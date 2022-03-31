@@ -820,8 +820,11 @@ public class VorkathPlayerPlugin extends iScript {
 
 		if(isAtVorkath()) { //Vorkath FIGHT LOGIC
 
+
 			iNPC vorkathAlive = game.npcs().withId(NpcID.VORKATH_8061).nearest();
 			final WorldPoint baseTile = config.useRange() ? WorldPoint.fromLocal(client, rangeBaseTile) : WorldPoint.fromLocal(client, meleeBaseTile);
+
+			if (player.getAnimation() == 839) return TIMEOUT;
 
 			if(!isFireball && !isAcid) {
 				if (shouldDrinkVenom()) return DRINK_ANTIVENOM;
@@ -924,7 +927,10 @@ public class VorkathPlayerPlugin extends iScript {
 
 		}
 
-		if(isInPOH()){
+		if(isInPOH())
+		{
+			if(!playerUtils.isRunEnabled()) return TOGGLE_RUN;
+
 			if (config.usePool() && (game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS)
 					|| game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER)
 					|| client.getVar(VarPlayer.SPECIAL_ATTACK_PERCENT) < 1000)) {
@@ -950,10 +956,12 @@ public class VorkathPlayerPlugin extends iScript {
 			return LEAVE_BANK;
 		}
 
-		if(kickedOffIsland.intersectsWith(player.getWorldArea()) && !player.isMoving()){
+		//if(kickedOffIsland.intersectsWith(player.getWorldArea()) && !player.isMoving()){
+		if(shouldUseBoat() && !player.isMoving()){
 			return USE_BOAT;
 		}
-		if(afterBoat.intersectsWith(player.getWorldArea()) && !player.isMoving()){
+		//if(afterBoat.intersectsWith(player.getWorldArea()) && !player.isMoving()){
+		if(shouldUseObstacle() && !player.isMoving() && player.getAnimation() == -1){
 			return USE_OBSTACLE;
 		}
 
@@ -1043,7 +1051,7 @@ public class VorkathPlayerPlugin extends iScript {
 				itemValues.put(a.getId(), game.getFromClientThread(() -> utils.getItemPrice(a.getId(), true)));
 			}
 			name = game.getFromClientThread(() -> client.getItemComposition(a.getId()).getName()).toLowerCase();
-			return !excludedItems.stream().anyMatch(name::contains) && (includedItems.stream().anyMatch(name::contains) || value >= config.lootValue() || (a.getId() == ItemID.BLUE_DRAGONHIDE && a.getId() > 3) || (config.lootBones() && a.getId() == ItemID.SUPERIOR_DRAGON_BONES) || (config.lootHide() && a.getId() == ItemID.BLUE_DRAGONHIDE));
+			return !excludedItems.stream().anyMatch(name::contains) && (includedItems.stream().anyMatch(name::contains) || value >= config.lootValue() || (a.getId() == ItemID.BLUE_DRAGONHIDE + 1) || (config.lootBones() && a.getId() == ItemID.SUPERIOR_DRAGON_BONES) || (config.lootHide() && a.getId() == ItemID.BLUE_DRAGONHIDE));
 
 		}).sorted(Comparator.comparingInt(b -> {
 			return itemValues.get(b.getId()) * b.getQuantity();
@@ -1452,4 +1460,14 @@ public class VorkathPlayerPlugin extends iScript {
 			}
 	}
 
+	public boolean shouldUseObstacle(){
+		GameObject object = objectUtils.findNearestGameObject(31990);
+		return !client.isInInstancedRegion() && object != null;
+
+	}
+
+	public boolean shouldUseBoat(){
+		GameObject bigBoat = objectUtils.findNearestGameObject(4391);
+		return bigBoat != null;
+	}
 }
