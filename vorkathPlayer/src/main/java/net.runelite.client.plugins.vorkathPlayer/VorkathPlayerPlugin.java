@@ -86,6 +86,10 @@ public class VorkathPlayerPlugin extends iScript {
 	public HashMap<Integer, Integer> inventoryItems;
 	public HashMap<Integer, Integer> itemValues;
 
+	List<String> includedItems;
+	List<String> excludedItems;
+
+
 	private boolean startPlugin = false;
 	private int timeout;
 	private int specCount;
@@ -96,6 +100,7 @@ public class VorkathPlayerPlugin extends iScript {
 	private long sleepLength;
 	private boolean hasSpecced;
 	private boolean shouldLoot;
+	private boolean rechargeHelm;
 
 	private WorldArea kickedOffIsland;
 	private WorldArea afterBoat;
@@ -108,6 +113,7 @@ public class VorkathPlayerPlugin extends iScript {
 	private LocalPoint meleeBaseTile;
 	private LocalPoint rangeBaseTile;
 	public List<TileItem> items;
+	public Collection<Integer> serpItems;
 
 
 	private int DIAMOND_SET;
@@ -144,17 +150,21 @@ public class VorkathPlayerPlugin extends iScript {
 		meleeBaseTile = new LocalPoint(6208, 7744);
 		rangeBaseTile = new LocalPoint(6208, 7104);
 		kickedOffIsland = new WorldArea(new WorldPoint(2626, 3666, 0), new WorldPoint(2649, 3687, 0));
-		afterBoat = new WorldArea(new WorldPoint(2277, 4034, 0), new WorldPoint(2279, 4036, 0));
+		afterBoat = new WorldArea(new WorldPoint(2266, 4031, 0), new WorldPoint(2283, 4055, 0));
+		serpItems = Set.of(ItemID.ZULRAHS_SCALES, ItemID.SERPENTINE_HELM_UNCHARGED, ItemID.SERPENTINE_HELM);
 		acidSpots = new ArrayList<>();
 		acidFreePath = new ArrayList<>();
 		safeVorkathTiles = new ArrayList<>();
 		itemValues = new HashMap<>();
 		items = new ArrayList<>();
+		includedItems  = new ArrayList<>();
+		excludedItems  = new ArrayList<>();
 		safeWooxTile = null;
 		fireballPoint = null;
 		isMinion = false;
 		isAcid = false;
 		isFireball = false;
+		rechargeHelm = false;
 
 		timeout = 0;
 		specCount = 0;
@@ -198,24 +208,12 @@ public class VorkathPlayerPlugin extends iScript {
 		acidFreePath.clear();
 		hasSpecced = false;
 		shouldLoot = false;
+		rechargeHelm = false;
 	}
 
 	@Override
 	protected void loop() {
 		if(client.getGameState() != GameState.LOGGED_IN || !startPlugin || client.getLocalPlayer() == null) return;
-
-		if(shouldLoot()){
-			if(invUtils.isFull()){
-				if(invUtils.containsItem(ItemID.VIAL)){
-					useItem(getWidgetItem(Set.of(ItemID.VIAL)), MenuAction.ITEM_FIFTH_OPTION);
-				}
-				if(config.eatLoot() && getFood() != null){
-					useItem(getFood(), MenuAction.ITEM_FIRST_OPTION);
-				}
-			}else{
-				if(getLoot() != null && !playerUtils.isMoving()) getLoot().interact("Take");
-			}
-		}
 		game.tick();
 	}
 
@@ -264,6 +262,7 @@ public class VorkathPlayerPlugin extends iScript {
 			switch (getState()){
 				case EAT_FOOD:
 					useItem(getFood(), MenuAction.ITEM_FIRST_OPTION);
+					if(isVorkathAsleep()) timeout+=1;
 					break;
 				case DRINK_ANTIVENOM:
 					useItem(getWidgetItem(config.antivenom().getIds()), MenuAction.ITEM_FIRST_OPTION);
@@ -312,7 +311,19 @@ public class VorkathPlayerPlugin extends iScript {
 					actionNPC(vorkathAsleep.id(), MenuAction.NPC_FIRST_OPTION);
 					break;
 				case LOOT_VORKATH:
-					shouldLoot = true;
+					if(invUtils.isFull()){
+						if(invUtils.containsItem(ItemID.VIAL)){
+							useItem(getWidgetItem(Set.of(ItemID.VIAL)), MenuAction.ITEM_FIFTH_OPTION);
+						}
+						if((config.eatLoot() && getFood() != null) || (!hasFoodForKill() && getFood() != null)){
+							useItem(getFood(), MenuAction.ITEM_FIRST_OPTION);
+							timeout+=1;
+						}
+					}else{
+						if(getLoot() != null && !playerUtils.isMoving()) {
+							lootItem(getLoot());
+						}
+					}
 					break;
 				case DISTANCE_CHECK:
 					walkUtils.sceneWalk(baseTile, 0, sleepDelay());
@@ -487,6 +498,45 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 		else if(isNearBank()){
 			switch(getState()){
+				case RECHARGE_HELM:
+					if(isItemEquipped(ItemID.SERPENTINE_HELM)){
+						rechargeHelm = false;
+						break;
+					}
+					if(invUtils.containsItem(ItemID.SERPENTINE_HELM)){
+						useItem(getWidgetItem(Set.of(ItemID.SERPENTINE_HELM)), MenuAction.ITEM_SECOND_OPTION);
+						timeout+=1;
+					}
+					if(invUtils.containsExcept(serpItems)){
+						if(!bankUtils.isOpen()){
+							openBank();
+						}else{
+							bankUtils.depositAll();
+						}
+					}else{
+						if(!invUtils.containsItem(ItemID.ZULRAHS_SCALES)){
+							if(!bankUtils.isOpen()){
+								openBank();
+							}else{
+								if(!bankUtils.contains(client.getItemComposition(ItemID.ZULRAHS_SCALES).getName())){
+									game.sendGameMessage("Ran out of zulrah scales, stopping");
+									stop();
+								}
+								bankUtils.withdrawAllItem(ItemID.ZULRAHS_SCALES);
+							}
+						}else{
+							if(!invUtils.containsItem(ItemID.SERPENTINE_HELM_UNCHARGED)){
+								if(isItemEquipped(ItemID.SERPENTINE_HELM_UNCHARGED)){
+									game.equipment().withId(ItemID.SERPENTINE_HELM_UNCHARGED).unequip();
+								}
+							}else{
+								if(bankUtils.isOpen()) bankUtils.close();
+								useItemItem(client.getItemComposition(ItemID.ZULRAHS_SCALES).getName(), client.getItemComposition(ItemID.SERPENTINE_HELM_UNCHARGED).getName());
+								timeout+=1;
+							}
+						}
+					}
+						break;
 				case FIX_GEAR:
 					if(invUtils.getEmptySlots() < 6){
 						if(bankUtils.isOpen()){
@@ -550,9 +600,10 @@ public class VorkathPlayerPlugin extends iScript {
 								return;
 							}
 
-							if(client.getItemComposition(id).getName().contains("bolt")
+							if(client.getItemComposition(id).getName().contains("bolts")
 								&& !invUtils.containsItemAmount(id, inventoryItems.get(id), true, true)){
-								bankUtils.withdrawItemAmount(id, (inventoryItems.get(id) - invUtils.getItemCount(id, true)));
+								log.info(client.getItemComposition(id).getName());
+								bankUtils.withdrawAllItem(id);
 								timeout+=3;
 								return;
 							}else if (!client.getItemComposition(id).getName().contains("bolt")){
@@ -658,11 +709,16 @@ public class VorkathPlayerPlugin extends iScript {
 		String message = ev.getMessage();
 
 		String deathMessage = "Oh dear, you are dead!";
+		String serpHelm = "Your serpentine helm has run out of";
 
 		if(message.equalsIgnoreCase(deathMessage)){
 			timeout+=2;
 			game.sendGameMessage("You suck omegal0l");
 			stop();
+		}
+		if(message.contains(serpHelm)){
+			teleToPoH();
+			rechargeHelm = true;
 		}
 	}
 
@@ -675,7 +731,8 @@ public class VorkathPlayerPlugin extends iScript {
 			if (!startPlugin) {
 				game.sendGameMessage("Vorkath Started");
 				startPlugin = true;
-
+				includedItems = Arrays.asList(config.includedItems().toLowerCase().split("\\s*,\\s*"));
+				excludedItems = Arrays.asList(config.excludedItems().toLowerCase().split("\\s*,\\s*"));
 				inventoryItems = new HashMap<>();
 				initInventoryItems();
 				start();
@@ -770,10 +827,11 @@ public class VorkathPlayerPlugin extends iScript {
 				if (shouldDrinkVenom()) return DRINK_ANTIVENOM;
 				if (shouldDrinkAntifire()) return DRINK_ANTIFIRE;
 				if (shouldDrinkBoost()) return DRINK_BOOST;
-				if (shouldDrinkRestore()) return DRINK_RESTORE;
+				if (shouldDrinkRestore() && ((vorkathAlive != null && prayerUtils.isQuickPrayerActive()) || vorkathAlive == null || (vorkathAlive != null && prayerUtils.getPoints() <= 2))) return DRINK_RESTORE;
 			}
 
-			if(shouldEat() && !isAcid() && !isFireball) return EAT_FOOD;
+			if(shouldEat() && !isAcid() && !isFireball)
+				return EAT_FOOD;
 
 			if((vorkathAlive != null || isWakingUp())
 					&& !isAcid
@@ -854,8 +912,10 @@ public class VorkathPlayerPlugin extends iScript {
 				return POKE_VORKATH;
 
 			if(shouldLoot()
-					&& (!invUtils.isFull() || (invUtils.isFull() && (config.eatLoot() && getFood() != null) || invUtils.containsItem(ItemID.VIAL))))
+					&& (!invUtils.isFull() || (invUtils.isFull() && (config.eatLoot() && getFood() != null) || invUtils.containsItem(ItemID.VIAL)) || (!config.eatLoot() && invUtils.isFull() && !hasFoodForKill() && getFood() != null)))
 				return LOOT_VORKATH;
+
+			shouldLoot = false;
 
 			if((isVorkathAsleep() && shouldLoot() && ((invUtils.isFull() && !invUtils.containsItem(ItemID.VIAL) && getFood() == null))) || (!config.eatLoot() && invUtils.isFull() && getFood() == null) || (vorkathAlive != null && getFood() == null && game.modifiedLevel(Skill.HITPOINTS) <= config.eatAt()) || (!shouldLoot() && (prayerUtils.getPoints() == 0 && getWidgetItem(config.prayer().getIds()) == null) || (game.modifiedLevel(Skill.HITPOINTS) <= 5) || (shouldDrinkVenom() && getWidgetItem(config.antivenom().getIds()) == null) || (shouldDrinkAntifire() && getWidgetItem(config.antifire().getIds()) == null)) || (!hasFoodForKill() && isVorkathAsleep()))
 				return TELEPORT_TO_POH;
@@ -874,6 +934,13 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 
 		if(isNearBank()){
+			if(hasLowRunes()){
+				game.sendGameMessage("Low runes");
+				stop();
+			}
+			if(rechargeHelm)
+				return RECHARGE_HELM;
+
 			if(!isGeared())
 				return FIX_GEAR;
 			if(shouldEatAtBank())
@@ -930,7 +997,7 @@ public class VorkathPlayerPlugin extends iScript {
 	}
 
 	public boolean shouldEat(){
-		return (game.modifiedLevel(Skill.HITPOINTS) <= config.eatAt() && getFood() != null) || (isAtVorkath() && isVorkathAsleep() && (game.modifiedLevel(Skill.HITPOINTS) <= game.baseLevel(Skill.HITPOINTS) - 20) && getFood() != null);
+		return (game.modifiedLevel(Skill.HITPOINTS) <= config.eatAt() && getFood() != null) || (isAtVorkath() && isVorkathAsleep() && (game.modifiedLevel(Skill.HITPOINTS) <= game.baseLevel(Skill.HITPOINTS) - 20 && !shouldLoot) && getFood() != null);
 	}
 
 	public boolean shouldDrinkAntifire(){
@@ -946,7 +1013,6 @@ public class VorkathPlayerPlugin extends iScript {
 		return goodBanker != null;
 	}
 
-
 	public boolean isItemEquipped(int id){
 		return game.equipment().withId(id).exists();
 	}
@@ -959,41 +1025,37 @@ public class VorkathPlayerPlugin extends iScript {
 	public boolean shouldLoot(){
 		iNPC vork = game.npcs().withId(NpcID.VORKATH_8061).first();
 
-		if(getLoot() != null && getLoot().id() == ItemID.SUPERIOR_DRAGON_BONES && invUtils.isFull() && config.lootBonesIfRoom() && hasFoodForKill()) return false;
+		if(getLoot() != null && getLoot().getId() == ItemID.SUPERIOR_DRAGON_BONES && invUtils.isFull() && config.lootBonesIfRoom() && hasFoodForKill()) return false;
 
 		return getLoot() != null && (isVorkathAsleep());
 	}
 
+	public TileItem getLoot() {
+		Set<TileItem> items = iUtils.tileItems;
+		if (items.isEmpty()) return null;
 
-
-	public iGroundItem getLoot(){
-		iNPC vork = game.npcs().withId(NpcID.VORKATH_8061).first();
-
-		List<iGroundItem> loot = game.groundItems().filter(a -> {
-
+		List<TileItem> filtered = items.stream().filter(a -> {
 			int value = 0;
-			if(itemValues.containsKey(a.id())){
-				value = itemValues.get(a.id()) * a.quantity();
-			}else{
-				itemValues.put(a.id(), game.getFromClientThread(() -> utils.getItemPrice(a.id(), true)));
+			String name = "";
+			if (itemValues.containsKey(a.getId())) {
+				value = itemValues.get(a.getId()) * a.getQuantity();
+			} else {
+				itemValues.put(a.getId(), game.getFromClientThread(() -> utils.getItemPrice(a.getId(), true)));
 			}
+			name = game.getFromClientThread(() -> client.getItemComposition(a.getId()).getName()).toLowerCase();
+			return !excludedItems.stream().anyMatch(name::contains) && (includedItems.stream().anyMatch(name::contains) || value >= config.lootValue() || (a.getId() == ItemID.BLUE_DRAGONHIDE && a.getId() > 3) || (config.lootBones() && a.getId() == ItemID.SUPERIOR_DRAGON_BONES) || (config.lootHide() && a.getId() == ItemID.BLUE_DRAGONHIDE));
 
-			return value >= config.lootValue() || (a.id() == ItemID.BLUE_DRAGONHIDE && a.quantity() > 3) || (config.lootBones() && a.id() == ItemID.SUPERIOR_DRAGON_BONES) || (config.lootHide() && a.id() == ItemID.BLUE_DRAGONHIDE);
 		}).sorted(Comparator.comparingInt(b -> {
-			return itemValues.get(b.id()) * b.quantity();
-
+			return itemValues.get(b.getId()) * b.getQuantity();
 		})).collect(Collectors.toList());
 
-		Collections.reverse(loot);
-
-		if(!loot.isEmpty()){
-			if(onlyContainsBones(loot)){
-				Collections.sort(loot, Comparator.comparingInt(o -> (int) o.position().distanceTo(client.getLocalPlayer().getWorldLocation())));
-				return loot.get(0);
+		Collections.reverse(filtered);
+		if (!filtered.isEmpty()) {
+			if (onlyContainsBones(filtered)) {
+				Collections.sort(filtered, Comparator.comparingInt(o -> (int) o.getTile().getWorldLocation().distanceTo(client.getLocalPlayer().getWorldLocation())));
 			}
-			return loot.get(0);
+			return filtered.get(0);
 		}
-
 		return null;
 	}
 
@@ -1002,12 +1064,13 @@ public class VorkathPlayerPlugin extends iScript {
 		return isAtVorkath() && vorkathAsleep != null;
 	}
 
-	public boolean onlyContainsBones(List<iGroundItem> bones){
-		for(iGroundItem i : bones){
-			if(i.id() != ItemID.SUPERIOR_DRAGON_BONES) return false;
+	public boolean onlyContainsBones(List<TileItem> test){
+		for(TileItem i : test){
+			if(i.getId() != ItemID.SUPERIOR_DRAGON_BONES) return false;
 		}
 		return true;
 	}
+
 	public boolean isWakingUp(){
 		NPC vorkathWaking = npcUtils.findNearestNpc(NpcID.VORKATH_8058);
 		return isAtVorkath() && vorkathWaking != null;
@@ -1047,8 +1110,7 @@ public class VorkathPlayerPlugin extends iScript {
 		return (int)((maxHealth * healthRatio / healthScale) + 0.5f);
 	}
 
-	private void calculateAcidFreePath()
-	{
+	private void calculateAcidFreePath() {
 		acidFreePath.clear();
 
 		Player player = client.getLocalPlayer();
@@ -1178,7 +1240,6 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 	}
 
-
 	private WidgetItem getWidgetItem(Collection c){
 		if(invUtils.containsItem(c)){
 			return invUtils.getWidgetItem(c);
@@ -1216,6 +1277,7 @@ public class VorkathPlayerPlugin extends iScript {
 				utils.doActionMsTime(targetMenu, widget.getBounds(), sleepDelay());
 		}
 	}
+
 	private void toggleRun(){
 		utils.doInvokeMsTime(new LegacyMenuEntry("Toggle Run", "", 1, MenuAction.CC_OP, -1,
 				10485783, false), 0);
@@ -1299,12 +1361,12 @@ public class VorkathPlayerPlugin extends iScript {
 				RUBY_SET = ItemID.RUBY_DRAGON_BOLTS_E;
 				DIAMOND_SET = ItemID.DIAMOND_DRAGON_BOLTS_E;
 
-				inventoryItems.put(ItemID.DIAMOND_DRAGON_BOLTS_E, 500);
+				inventoryItems.put(ItemID.DIAMOND_DRAGON_BOLTS_E, -1);
 			}else{
 				RUBY_SET = ItemID.RUBY_BOLTS_E;
 				DIAMOND_SET = ItemID.DIAMOND_BOLTS_E;
 
-				inventoryItems.put(ItemID.DIAMOND_BOLTS_E, 500);
+				inventoryItems.put(ItemID.DIAMOND_BOLTS_E, -1);
 
 			}
 		}
@@ -1372,6 +1434,22 @@ public class VorkathPlayerPlugin extends iScript {
 			utils.doActionMsTime(targetMenu, bounds, (int)sleepDelay());
 		else
 			utils.doInvokeMsTime(targetMenu, (int)sleepDelay());
+	}
+
+	public boolean hasLowRunes(){
+		if(!invUtils.containsItem(config.pouchID())) return false;
+
+		int law = invUtils.runePouchQuanitity(ItemID.LAW_RUNE);
+		int dustEarth = invUtils.runePouchContains(ItemID.DUST_RUNE) ? invUtils.runePouchQuanitity(ItemID.DUST_RUNE) : invUtils.runePouchQuanitity(ItemID.EARTH_RUNE);
+		int chaos = invUtils.runePouchQuanitity(ItemID.CHAOS_RUNE);
+
+		return law < 50 || dustEarth < 25 || chaos < 50;
+	}
+
+	private void lootItem(TileItem item) {
+			if (item != null) {
+				utils.doInvokeMsTime(new LegacyMenuEntry("", "", item.getId(), MenuAction.GROUND_ITEM_THIRD_OPTION.getId(), item.getTile().getSceneLocation().getX(), item.getTile().getSceneLocation().getY(), false), 0);
+			}
 	}
 
 }

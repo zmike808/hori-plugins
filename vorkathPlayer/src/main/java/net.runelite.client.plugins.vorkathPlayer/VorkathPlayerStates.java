@@ -34,5 +34,6 @@ public enum VorkathPlayerStates {
     USE_BOAT,
     USE_OBSTACLE,
     WITHDRAW_INVENTORY,
+    RECHARGE_HELM,
     TIMEOUT;
 }
