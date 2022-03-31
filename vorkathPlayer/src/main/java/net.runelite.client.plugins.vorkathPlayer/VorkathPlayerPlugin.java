@@ -568,6 +568,12 @@ public class VorkathPlayerPlugin extends iScript {
 					}
 					break;
 				case OVEREAT:
+					if(invUtils.isFull()){
+						if(!bankUtils.isOpen()) openBank();
+						else
+							bankUtils.depositAll();
+						timeout+=2;
+					}
 					if(config.overEat() && getFoodId() == ItemID.ANGLERFISH && game.modifiedLevel(Skill.HITPOINTS) <= game.baseLevel(Skill.HITPOINTS)){
 						withdrawUse(new HashMap<Integer, Integer>() {{
 							put(getFoodId(), 1);
