@@ -23,6 +23,7 @@ import org.pf4j.Extension;
 
 import javax.inject.Inject;
 import java.awt.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -255,6 +256,11 @@ public class VorkathPlayerPlugin extends iScript {
 			safeVorkathTiles.clear();
 		}
 
+		if(config.debug()){
+			game.sendGameMessage("State: " + String.valueOf(getState()));
+
+		}
+
 		if(isAtVorkath()){
 
 			createSafetiles();
@@ -265,6 +271,9 @@ public class VorkathPlayerPlugin extends iScript {
 					if(isVorkathAsleep()) timeout+=1;
 					break;
 				case DRINK_ANTIVENOM:
+					if(!invUtils.containsItem(config.antivenom().getIds())){
+						teleToPoH();
+					}
 					useItem(getWidgetItem(config.antivenom().getIds()), MenuAction.ITEM_FIRST_OPTION);
 					timeout+=1;
 					break;
@@ -718,8 +727,10 @@ public class VorkathPlayerPlugin extends iScript {
 		String serpHelm = "Your serpentine helm has run out of";
 
 		if(message.equalsIgnoreCase(deathMessage)){
+			SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+			Date date = new Date();
+			utils.sendGameMessage("Died at: " + format.format(date));
 			timeout+=2;
-			game.sendGameMessage("You suck omegal0l");
 			stop();
 		}
 		if(message.contains(serpHelm)){
@@ -832,15 +843,24 @@ public class VorkathPlayerPlugin extends iScript {
 
 			if (player.getAnimation() == 839) return TIMEOUT;
 
+			if(shouldEat() && !isAcid() && !isFireball)
+				return EAT_FOOD;
+
+			if(isAcid) return ACID_WALK;
+
+			if(isMinion) {
+				if(config.useStaff() && !isItemEquipped(getStaffId())) return EQUIP_STAFF;
+				return KILL_MINION;
+			}
+
+			if(isFireball) return DODGE_FIREBALL;
+
 			if(!isFireball && !isAcid) {
 				if (shouldDrinkVenom()) return DRINK_ANTIVENOM;
 				if (shouldDrinkAntifire()) return DRINK_ANTIFIRE;
 				if (shouldDrinkBoost()) return DRINK_BOOST;
 				if (shouldDrinkRestore() && ((vorkathAlive != null && prayerUtils.isQuickPrayerActive()) || vorkathAlive == null || (vorkathAlive != null && prayerUtils.getPoints() <= 2))) return DRINK_RESTORE;
 			}
-
-			if(shouldEat() && !isAcid() && !isFireball)
-				return EAT_FOOD;
 
 			if((vorkathAlive != null || isWakingUp())
 					&& !isAcid
@@ -851,16 +871,6 @@ public class VorkathPlayerPlugin extends iScript {
 					&& !player.isMoving()
 					&& (config.useRange() ? baseTile.distanceTo(player.getWorldLocation()) >= 4 : baseTile.distanceTo(player.getWorldLocation()) >= 4))
 				return DISTANCE_CHECK;
-
-
-			if(isAcid) return ACID_WALK;
-
-			if(isMinion) {
-				if(config.useStaff() && !isItemEquipped(getStaffId())) return EQUIP_STAFF;
-				return KILL_MINION;
-			}
-
-			if(isFireball) return DODGE_FIREBALL;
 
 			if(prayerUtils.isQuickPrayerActive()
 					&& prayerUtils.getPoints() > 0
@@ -1007,7 +1017,7 @@ public class VorkathPlayerPlugin extends iScript {
 	}
 
 	public boolean shouldDrinkVenom() {
-		return !isItemEquipped(ItemID.SERPENTINE_HELM) && game.varp(VarPlayer.POISON.getId()) > 0 && getWidgetItem(config.antivenom().getIds()) != null;
+		return !isItemEquipped(ItemID.SERPENTINE_HELM) && game.varp(VarPlayer.POISON.getId()) > 0;
 	}
 
 	public boolean shouldEat(){
