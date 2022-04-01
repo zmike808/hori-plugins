@@ -1070,7 +1070,7 @@ public class VorkathPlayerPlugin extends iScript {
 			}
 		}
 
-		return (!invUtils.isFull() || (!hasFoodForKill() && !config.eatLoot() && (itemToDrop(itemValues.get(getLoot().getId())) != null || getFood() != null))) && getLoot() != null && isVorkathAsleep();
+		return getLoot() != null && (!invUtils.isFull() || (!hasFoodForKill() && !config.eatLoot() && (itemToDrop(itemValues.get(getLoot().getId())) != null || getFood() != null))) && isVorkathAsleep();
 	}
 
 	public TileItem getLoot() {

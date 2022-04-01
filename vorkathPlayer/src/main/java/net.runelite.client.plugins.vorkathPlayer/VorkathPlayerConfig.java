@@ -272,7 +272,7 @@ public interface VorkathPlayerConfig extends Config {
     }
 
     @Range(min = 1, max = 14)
-    @ConfigItem(keyName = "minFood", name = "Minimum food", description = "Minimum amount of food per kill", position = 3, section = consumablesSection)
+    @ConfigItem(keyName = "minFood", name = "Minimum food", description = "Minimum amount of food to start next kill", position = 3, section = consumablesSection)
     default int minFood() {
         return 4;
     }
@@ -305,7 +305,7 @@ public interface VorkathPlayerConfig extends Config {
     }
 
     @Range(min = 1, max = 99)
-    @ConfigItem(keyName = "restoreAt", name = "Drink prayer at", description = "Drink prayer restore when under this amount of prayer", position = 13, section = consumablesSection)
+    @ConfigItem(keyName = "restoreAt", name = "Drink prayer at", description = "Drink prayer restore when under this amount of prayer", position = 12, section = consumablesSection)
     default int restoreAt() {
         return 20;
     }
