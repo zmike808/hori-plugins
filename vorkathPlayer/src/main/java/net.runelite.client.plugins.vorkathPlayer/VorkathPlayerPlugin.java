@@ -330,12 +330,19 @@ public class VorkathPlayerPlugin extends iScript {
 
 						}
 						 */
+						if(config.debug())
+							game.sendGameMessage("Loot vorkath: " + client.getItemComposition(getLoot().getId()).getName());
+
 						if(config.eatLoot() && hasFoodForKill()){
+							if(config.debug())
+								game.sendGameMessage("Eating food for loot...");
 							useItem(getFood(), MenuAction.ITEM_FIRST_OPTION);
 							timeout+=1;
 							return;
 						}
-						if((config.eatLoot() && itemToDrop(itemValues.get(getLoot().getId())) != null) || (!hasFoodForKill() && itemToDrop(itemValues.get(getLoot().getId())) != null)){
+						if((config.eatLoot() && itemToDrop(getLoot()) != null) || (!hasFoodForKill() && itemToDrop(getLoot()) != null)){
+							if(config.debug())
+								game.sendGameMessage("Prioritizing loot for: " + client.getItemComposition(itemToDrop(getLoot()).getId()).getName());
 							prioritizeLoot();
 							timeout+=1;
 						}
@@ -1061,16 +1068,16 @@ public class VorkathPlayerPlugin extends iScript {
 
 		if(getLoot() != null){
 			if(getLoot().getId() == ItemID.SUPERIOR_DRAGON_BONES){
-				if(invUtils.isFull() && !hasFoodForKill() && (getFood() != null || itemToDrop(itemValues.get(getLoot().getId())) != null)) return true;
+				if(invUtils.isFull() && !hasFoodForKill() && (getFood() != null || itemToDrop(getLoot()) != null)) return true;
 				if(invUtils.isFull() && config.lootBonesIfRoom() && hasFoodForKill()) return false;
 			}
 			if(config.eatLoot()){
 				if(invUtils.isFull() && hasFoodForKill()) return true;
-				if(invUtils.isFull() && itemToDrop(itemValues.get(getLoot().getId())) != null) return true;
+				if(invUtils.isFull() && itemToDrop(getLoot()) != null) return true;
 			}
 		}
 
-		return getLoot() != null && (!invUtils.isFull() || (!hasFoodForKill() && !config.eatLoot() && (itemToDrop(itemValues.get(getLoot().getId())) != null || getFood() != null))) && isVorkathAsleep();
+		return getLoot() != null && (!invUtils.isFull() || (!hasFoodForKill() && !config.eatLoot() && (itemToDrop(getLoot()) != null || getFood() != null))) && isVorkathAsleep();
 	}
 
 	public TileItem getLoot() {
@@ -1510,31 +1517,36 @@ public class VorkathPlayerPlugin extends iScript {
 		int lootPrice = 0;
 
 		if(getLoot() != null){
-			lootPrice = itemValues.get(getLoot().getId());
+			lootPrice = itemValues.get(getLoot().getId()) * getLoot().getQuantity();
 		}
 
-		WidgetItem itemToDrop = itemToDrop(lootPrice);
+		WidgetItem itemToDrop = itemToDrop(getLoot());
 
 		if(itemToDrop != null){
 			if(itemToDrop.getId() == getFoodId()){
 				useItem(itemToDrop, MenuAction.ITEM_FIRST_OPTION);
 				return;
 			}
-			if(!client.getItemComposition(itemToDrop.getId()).getName().contains("Divine") && Arrays.stream(client.getItemComposition(itemToDrop.getId()).getInventoryActions()).anyMatch(a -> a.contains("Drink"))){
+			useItem(itemToDrop, MenuAction.ITEM_FIFTH_OPTION);
+
+			/*if(!client.getItemComposition(itemToDrop.getId()).getName().contains("Divine") && Arrays.stream(client.getItemComposition(itemToDrop.getId()).getInventoryActions()).anyMatch(a -> a.contains("Drink"))){
 				useItem(itemToDrop, MenuAction.ITEM_FIRST_OPTION);
 				return;
 			}
-				useItem(itemToDrop, MenuAction.ITEM_FIFTH_OPTION);
+
+			 */
 		}
 	}
 
-	private WidgetItem itemToDrop(int value){
+	private WidgetItem itemToDrop(TileItem loot){
+		int lootValue = itemValues.get(loot.getId()) * loot.getQuantity();
+
 		for(WidgetItem item : invUtils.getAllItems()){
 
 			if(!client.getItemComposition(item.getId()).isTradeable() || item == null) continue;
 
 			if(itemValues.containsKey(item.getId())){
-				if((itemValues.get(item.getId()) * item.getQuantity()) < value){
+				if((itemValues.get(item.getId()) * item.getQuantity()) < lootValue){
 					return item;
 				}
 			}else{
