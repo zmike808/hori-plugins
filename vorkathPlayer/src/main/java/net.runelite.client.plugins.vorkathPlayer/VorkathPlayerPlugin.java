@@ -796,6 +796,8 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 		if(actor.getAnimation() == 7949){ //death animation
 			hasSpecced = false;
+			isMinion = false;
+			isAcid = false;
 		}
 		if(actor.getAnimation() == 7889){
 			isMinion = false;
