@@ -306,7 +306,10 @@ public class VorkathPlayerPlugin extends iScript {
 					break;
 				case EQUIP_SPEC:
 					if(invUtils.isFull() && getOffhandId() != -1){
-						if(getFood() != null) useItem(getFood(), MenuAction.ITEM_FIRST_OPTION);
+						if(getFood() != null){
+							useItem(getFood(), MenuAction.ITEM_FIRST_OPTION);
+							return;
+						}
 					}
 					useItem(getWidgetItem(Set.of(getSpecId())), MenuAction.ITEM_SECOND_OPTION);
 					break;
@@ -946,7 +949,7 @@ public class VorkathPlayerPlugin extends iScript {
 			if((isVorkathAsleep() && !shouldLoot() && !hasFoodForKill()) || (vorkathAlive != null && getFood() == null && game.modifiedLevel(Skill.HITPOINTS) <= config.eatAt()) || (!shouldLoot() && (prayerUtils.getPoints() == 0 && getWidgetItem(config.prayer().getIds()) == null) || (game.modifiedLevel(Skill.HITPOINTS) <= 5) || (shouldDrinkVenom() && getWidgetItem(config.antivenom().getIds()) == null) || (shouldDrinkAntifire() && getWidgetItem(config.antifire().getIds()) == null)))
 				return TELEPORT_TO_POH;
 
-			if(!playerUtils.isRunEnabled() && !isAcid) return TOGGLE_RUN;
+			if(!playerUtils.isRunEnabled() && !isAcid() ) return TOGGLE_RUN;
 
 		}
 
@@ -1067,7 +1070,7 @@ public class VorkathPlayerPlugin extends iScript {
 			}
 		}
 
-		return !invUtils.isFull() && getLoot() != null && isVorkathAsleep();
+		return (!invUtils.isFull() || (!hasFoodForKill() && !config.eatLoot() && (itemToDrop(itemValues.get(getLoot().getId())) != null || getFood() != null))) && getLoot() != null && isVorkathAsleep();
 	}
 
 	public TileItem getLoot() {
@@ -1296,7 +1299,7 @@ public class VorkathPlayerPlugin extends iScript {
 
 	private boolean hasFoodForKill(){
 		if(getFood() == null) return false;
-		return invUtils.getItemCount(config.food().getId(), false) >= config.minFood();
+		return (invUtils.getItemCount(config.food().getId(), false) >= config.minFood()) && (invUtils.containsItem(config.prayer().getIds()) || prayerUtils.getPoints() > 70);
 	}
 
 	private int getSpecialPercent(){
