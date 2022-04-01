@@ -930,13 +930,12 @@ public class VorkathPlayerPlugin extends iScript {
 			if(!player.isMoving() && !shouldLoot() && isVorkathAsleep() && !shouldDrinkRestore() && !shouldDrinkBoost() && !shouldDrinkAntifire() && !shouldDrinkVenom() && hasFoodForKill() && (game.modifiedLevel(Skill.HITPOINTS) >= (game.baseLevel(Skill.HITPOINTS) - 20)))
 				return POKE_VORKATH;
 
-			if(shouldLoot()
-					&& (!invUtils.isFull() || (invUtils.isFull() && (config.eatLoot() && getFood() != null) || invUtils.containsItem(ItemID.VIAL)) || (!config.eatLoot() && invUtils.isFull() && !hasFoodForKill() && getFood() != null)))
+			if(shouldLoot())
 				return LOOT_VORKATH;
 
 			shouldLoot = false;
 
-			if((isVorkathAsleep() && shouldLoot() && ((invUtils.isFull() && !invUtils.containsItem(ItemID.VIAL) && getFood() == null))) || (!config.eatLoot() && invUtils.isFull() && getFood() == null) || (vorkathAlive != null && getFood() == null && game.modifiedLevel(Skill.HITPOINTS) <= config.eatAt()) || (!shouldLoot() && (prayerUtils.getPoints() == 0 && getWidgetItem(config.prayer().getIds()) == null) || (game.modifiedLevel(Skill.HITPOINTS) <= 5) || (shouldDrinkVenom() && getWidgetItem(config.antivenom().getIds()) == null) || (shouldDrinkAntifire() && getWidgetItem(config.antifire().getIds()) == null)) || (!hasFoodForKill() && isVorkathAsleep()))
+			if((isVorkathAsleep() && !shouldLoot() && !hasFoodForKill()) || (vorkathAlive != null && getFood() == null && game.modifiedLevel(Skill.HITPOINTS) <= config.eatAt()) || (!shouldLoot() && (prayerUtils.getPoints() == 0 && getWidgetItem(config.prayer().getIds()) == null) || (game.modifiedLevel(Skill.HITPOINTS) <= 5) || (shouldDrinkVenom() && getWidgetItem(config.antivenom().getIds()) == null) || (shouldDrinkAntifire() && getWidgetItem(config.antifire().getIds()) == null)))
 				return TELEPORT_TO_POH;
 
 			if(!playerUtils.isRunEnabled() && !isAcid) return TOGGLE_RUN;
@@ -1021,7 +1020,7 @@ public class VorkathPlayerPlugin extends iScript {
 	}
 
 	public boolean shouldEat(){
-		return (game.modifiedLevel(Skill.HITPOINTS) <= config.eatAt() && getFood() != null) || (isAtVorkath() && isVorkathAsleep() && (game.modifiedLevel(Skill.HITPOINTS) <= game.baseLevel(Skill.HITPOINTS) - 20 && !shouldLoot) && getFood() != null);
+		return (game.modifiedLevel(Skill.HITPOINTS) <= config.eatAt() && getFood() != null) || (isAtVorkath() && isVorkathAsleep() && ((game.modifiedLevel(Skill.HITPOINTS) <= game.baseLevel(Skill.HITPOINTS) - 20) || (getFoodId() == ItemID.ANGLERFISH && game.modifiedLevel(Skill.HITPOINTS) <= game.baseLevel(Skill.HITPOINTS)) && !shouldLoot()) && getFood() != null);
 	}
 
 	public boolean shouldDrinkAntifire(){
@@ -1047,11 +1046,19 @@ public class VorkathPlayerPlugin extends iScript {
 	}
 
 	public boolean shouldLoot(){
-		iNPC vork = game.npcs().withId(NpcID.VORKATH_8061).first();
+		if(!isVorkathAsleep()) return false;
 
-		if(getLoot() != null && getLoot().getId() == ItemID.SUPERIOR_DRAGON_BONES && invUtils.isFull() && config.lootBonesIfRoom() && hasFoodForKill()) return false;
+		if(getLoot() != null){
+			if(getLoot().getId() == ItemID.SUPERIOR_DRAGON_BONES){
+				if(invUtils.isFull() && !hasFoodForKill() && (getFood() != null || invUtils.containsItem(ItemID.VIAL))) return true;
+				if(invUtils.isFull() && config.lootBonesIfRoom() && hasFoodForKill()) return false;
+			}
+			if(config.eatLoot()){
+				if(invUtils.isFull() && getFood() != null) return true;
+			}
+		}
 
-		return getLoot() != null && (isVorkathAsleep());
+		return !invUtils.isFull() && getLoot() != null && isVorkathAsleep();
 	}
 
 	public TileItem getLoot() {
