@@ -637,6 +637,7 @@ public class VorkathPlayerPlugin extends iScript {
 								put(config.prayer().getDose4(), 2);
 						}}, MenuAction.ITEM_FIRST_OPTION);
 					}
+					timeout+=1;
 						break;
 				case WITHDRAW_INVENTORY:
 					if(containsExcept(inventoryItems.keySet())){
@@ -755,15 +756,16 @@ public class VorkathPlayerPlugin extends iScript {
 							return;
 						}
 						bankUtils.withdrawItemAmount(k, v);
-					} else
-						if(!bankUtils.contains(k, v)){
+					} else {
+						if (!bankUtils.contains(k, v)) {
 							game.sendGameMessage("Failed to withdraw item id: " + k + " : item name: " + client.getItemComposition(k).getName());
 							stop();
 							return;
 						}
 						bankUtils.withdrawAllItem(k);
 					}
-				timeout+=1;
+				}
+				timeout+=2;
 			});
 		}else{
 			openBank();
