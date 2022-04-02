@@ -518,12 +518,17 @@ public class VorkathPlayerPlugin extends iScript {
 			}
 		}
 		else if (isInPOH()){
+			if(prayerUtils.isQuickPrayerActive()){
+				prayerUtils.toggleQuickPrayer(false, sleepDelay());
+				return;
+			}
+
 			switch (getState()){
 				case TOGGLE_RUN:
 					toggleRun();
 					break;
 				case USE_POOL:
-					if(prayerUtils.isQuickPrayerActive()) prayerUtils.toggleQuickPrayer(false, sleepDelay());
+
 					GameObject poolObject = objectUtils.findNearestGameObject(config.poolID());
 
 					if(poolObject != null && !player.isMoving())
