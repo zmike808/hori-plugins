@@ -466,11 +466,12 @@ public class VorkathPlayerPlugin extends iScript {
 
 					if(iceMinion != null && player.getInteracting() == null) {
 						attackMinion();
-						timeout+=1;
 					}
-					if(player.getInteracting() != null){
+					/*if(player.getInteracting() != null){
 						timeout+=4;
 					}
+
+					 */
 					break;
 				case DODGE_FIREBALL:
 					LocalPoint bomb = LocalPoint.fromWorld(client, fireballPoint);
@@ -811,6 +812,7 @@ public class VorkathPlayerPlugin extends iScript {
 			isAcid = false;
 		}
 		if(actor.getAnimation() == 7889){
+			timeout+=4;
 			isMinion = false;
 		}
 		if(actor.getAnimation() == 7957 && actor.getName().equalsIgnoreCase("Vorkath")){
