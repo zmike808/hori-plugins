@@ -458,12 +458,17 @@ public class VorkathPlayerPlugin extends iScript {
 						walkUtils.sceneWalk(playerLocal, 0, sleepDelay());
 						return;
 					}
+
 					if(prayerUtils.isQuickPrayerActive()){
 						prayerUtils.toggleQuickPrayer(false, sleepDelay());
 						return;
 					}
+
 					if(iceMinion != null && player.getInteracting() == null) {
 						attackMinion();
+						timeout+=1;
+					}
+					if(player.getInteracting() != null){
 						timeout+=4;
 					}
 					break;
@@ -502,6 +507,9 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 		else if (isInPOH()){
 			switch (getState()){
+				case TOGGLE_RUN:
+					toggleRun();
+					break;
 				case USE_POOL:
 					if(prayerUtils.isQuickPrayerActive()) prayerUtils.toggleQuickPrayer(false, sleepDelay());
 					GameObject poolObject = objectUtils.findNearestGameObject(config.poolID());
@@ -525,6 +533,9 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 		else if(isNearBank()){
 			switch(getState()){
+				case TOGGLE_RUN:
+					toggleRun();
+					break;
 				case RECHARGE_HELM:
 					if(isItemEquipped(ItemID.SERPENTINE_HELM)){
 						rechargeHelm = false;
@@ -875,7 +886,7 @@ public class VorkathPlayerPlugin extends iScript {
 
 			if(isFireball) return DODGE_FIREBALL;
 
-			if(!isFireball && !isAcid) {
+			if(!isMinion && !isFireball && !isAcid) {
 				if (shouldDrinkVenom()) return DRINK_ANTIVENOM;
 				if (shouldDrinkAntifire()) return DRINK_ANTIFIRE;
 				if (shouldDrinkBoost()) return DRINK_BOOST;
@@ -903,7 +914,7 @@ public class VorkathPlayerPlugin extends iScript {
 			if(prayerUtils.getPoints() > 0 && !prayerUtils.isQuickPrayerActive()
 					&& ((vorkathAlive != null
 					&& !vorkathAlive.isDead()
-					&& !isAcid
+					&& !isAcid()
 					&& !isMinion) || isWakingUp()))
 				return PRAYER_ON;
 
@@ -962,8 +973,7 @@ public class VorkathPlayerPlugin extends iScript {
 
 		}
 
-		if(isInPOH())
-		{
+		if(isInPOH()) {
 			if(!playerUtils.isRunEnabled()) return TOGGLE_RUN;
 
 			if (config.usePool() && (game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS)
@@ -1040,7 +1050,7 @@ public class VorkathPlayerPlugin extends iScript {
 	}
 
 	public boolean shouldEat(){
-		return (game.modifiedLevel(Skill.HITPOINTS) <= config.eatAt() && getFood() != null) || (isAtVorkath() && isVorkathAsleep() && ((game.modifiedLevel(Skill.HITPOINTS) <= game.baseLevel(Skill.HITPOINTS) - 20) || (getFoodId() == ItemID.ANGLERFISH && game.modifiedLevel(Skill.HITPOINTS) <= game.baseLevel(Skill.HITPOINTS)) && !shouldLoot()) && getFood() != null);
+		return (game.modifiedLevel(Skill.HITPOINTS) <= config.eatAt() && getFood() != null) || (isAtVorkath() && isVorkathAsleep() && ((game.modifiedLevel(Skill.HITPOINTS) <= game.baseLevel(Skill.HITPOINTS) - 20) && !shouldLoot()) && getFood() != null);
 	}
 
 	public boolean shouldDrinkAntifire(){
@@ -1542,6 +1552,7 @@ public class VorkathPlayerPlugin extends iScript {
 
 	private WidgetItem itemToDrop(TileItem loot){
 		int lootValue = itemValues.get(loot.getId()) * loot.getQuantity();
+
 
 		for(WidgetItem item : invUtils.getAllItems()){
 
