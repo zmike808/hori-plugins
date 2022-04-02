@@ -102,7 +102,7 @@ public class VorkathPlayerPlugin extends iScript {
 	private boolean hasSpecced;
 	private boolean shouldLoot;
 	private boolean rechargeHelm;
-
+	private boolean gotPet;
 	private WorldArea kickedOffIsland;
 	private WorldArea afterBoat;
 	private WorldPoint fireballPoint;
@@ -166,6 +166,7 @@ public class VorkathPlayerPlugin extends iScript {
 		isAcid = false;
 		isFireball = false;
 		rechargeHelm = false;
+		gotPet = false;
 
 		timeout = 0;
 		specCount = 0;
@@ -210,6 +211,7 @@ public class VorkathPlayerPlugin extends iScript {
 		hasSpecced = false;
 		shouldLoot = false;
 		rechargeHelm = false;
+		gotPet = false;
 	}
 
 	@Override
@@ -227,6 +229,14 @@ public class VorkathPlayerPlugin extends iScript {
 		final Widget prayerWidget = client.getWidget(WidgetInfo.MINIMAP_QUICK_PRAYER_ORB);
 
 		log.info(String.valueOf(getState()));
+
+		if(gotPet){
+			if(!isInPOH() || isAtVorkath()){
+				teleToPoH();
+			}else{
+				stop();
+			}
+		}
 
 		if(timeout > 0){
 			--timeout;
@@ -755,7 +765,11 @@ public class VorkathPlayerPlugin extends iScript {
 
 		String deathMessage = "Oh dear, you are dead!";
 		String serpHelm = "Your serpentine helm has run out of";
-
+		if(message.contains("You have a funny feeling")) {
+			gotPet = true;
+			teleToPoH();
+			return;
+		}
 		if(message.equalsIgnoreCase(deathMessage)){
 			SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
 			Date date = new Date();
