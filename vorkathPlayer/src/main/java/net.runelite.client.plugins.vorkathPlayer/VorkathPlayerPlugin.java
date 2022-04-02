@@ -1588,7 +1588,7 @@ public class VorkathPlayerPlugin extends iScript {
 	}
 
 	private WidgetItem itemToDrop(TileItem loot){
-		int lootValue = itemValues.get(loot.getId()) * loot.getQuantity();
+		int lootValue = loot.getId() == ItemID.VORKATHS_HEAD ? 75000 : itemValues.get(loot.getId()) * loot.getQuantity();
 
 
 		for(WidgetItem item : invUtils.getAllItems()){
