@@ -236,6 +236,7 @@ public class VorkathPlayerPlugin extends iScript {
 			}else{
 				stop();
 			}
+			return;
 		}
 
 		if(timeout > 0){
@@ -649,6 +650,10 @@ public class VorkathPlayerPlugin extends iScript {
 					}
 					if(bankUtils.isOpen()) {
 						for (int id : inventoryItems.keySet()) {
+							if(config.debug()){
+								game.sendGameMessage("Banking for:" + client.getItemComposition(id).getName() + ". Found amount: " + (bankUtils.contains(id, 1) ? bank.quantity(id) : "0"));
+							}
+							
 							if(!bankUtils.contains(id, 1) && !invUtils.containsItem(id)){
 								game.sendGameMessage("Failed to find id: " + id);
 								stop();
@@ -656,7 +661,7 @@ public class VorkathPlayerPlugin extends iScript {
 							}
 
 							if(client.getItemComposition(id).getName().contains("bolts")
-								&& !invUtils.containsItemAmount(id, inventoryItems.get(id), true, true)){
+									&& !invUtils.containsItemAmount(id, inventoryItems.get(id), true, true)){
 								log.info(client.getItemComposition(id).getName());
 								bankUtils.withdrawAllItem(id);
 								timeout+=3;
@@ -745,12 +750,20 @@ public class VorkathPlayerPlugin extends iScript {
 			list.forEach((k, v) -> {
 				if(!invUtils.containsItem(k)) {
 					if (v >= 1) {
+						if(!bankUtils.contains(k, v)){
+							game.sendGameMessage("Failed to withdraw item id: " + k + " : item name: " + client.getItemComposition(k).getName());
+							stop();
+							return;
+						}
 						bankUtils.withdrawItemAmount(k, v);
 					} else
+						if(!bankUtils.contains(k, v)){
+							game.sendGameMessage("Failed to withdraw item id: " + k + " : item name: " + client.getItemComposition(k).getName());
+							stop();
+							return;
+						}
 						bankUtils.withdrawAllItem(k);
 					}
-					timeout+=1;
-				;
 			});
 		}else{
 			openBank();
@@ -905,7 +918,6 @@ public class VorkathPlayerPlugin extends iScript {
 			if(!isMinion && !isFireball && !isAcid) {
 				if (shouldDrinkVenom()) return DRINK_ANTIVENOM;
 				if (shouldDrinkAntifire()) return DRINK_ANTIFIRE;
-				if (shouldDrinkBoost()) return DRINK_BOOST;
 				if (shouldDrinkRestore() && ((vorkathAlive != null && prayerUtils.isQuickPrayerActive()) || vorkathAlive == null || (vorkathAlive != null && prayerUtils.getPoints() <= 2))) return DRINK_RESTORE;
 			}
 
@@ -973,6 +985,8 @@ public class VorkathPlayerPlugin extends iScript {
 					&& !isAcid
 					&& !isWakingUp())
 				return RETALIATE;
+
+			if (shouldDrinkBoost()) return DRINK_BOOST;
 
 			if(!player.isMoving() && !shouldLoot() && isVorkathAsleep() && !shouldDrinkRestore() && !shouldDrinkBoost() && !shouldDrinkAntifire() && !shouldDrinkVenom() && hasFoodForKill() && (game.modifiedLevel(Skill.HITPOINTS) >= (game.baseLevel(Skill.HITPOINTS) - 20)))
 				return POKE_VORKATH;
@@ -1070,7 +1084,7 @@ public class VorkathPlayerPlugin extends iScript {
 	}
 
 	public boolean shouldDrinkAntifire(){
-		return config.antifire().name().toLowerCase().contains("super") ? game.varb(6101) == 0 : game.varb(3981) == 0 && getWidgetItem(config.antifire().getIds()) != null;
+		return (config.antifire().name().toLowerCase().contains("super") ? game.varb(6101) == 0 : game.varb(3981) == 0 && getWidgetItem(config.antifire().getIds()) != null) && invUtils.containsItem(config.antifire().getIds());
 	}
 
 	public boolean shouldDrinkRestore(){
@@ -1130,7 +1144,7 @@ public class VorkathPlayerPlugin extends iScript {
 		Collections.reverse(filtered);
 		if (!filtered.isEmpty()) {
 			if (onlyContainsBones(filtered)) {
-				Collections.sort(filtered, Comparator.comparingInt(o -> (int) o.getTile().getWorldLocation().distanceTo(client.getLocalPlayer().getWorldLocation())));
+				Collections.sort(filtered, Comparator.comparingInt(o -> o.getTile().getWorldLocation().distanceTo(client.getLocalPlayer().getWorldLocation())));
 			}
 			return filtered.get(0);
 		}
