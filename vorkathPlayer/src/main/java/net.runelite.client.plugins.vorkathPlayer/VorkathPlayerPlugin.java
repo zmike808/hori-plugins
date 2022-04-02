@@ -653,7 +653,7 @@ public class VorkathPlayerPlugin extends iScript {
 							if(config.debug()){
 								game.sendGameMessage("Banking for:" + client.getItemComposition(id).getName() + ". Found amount: " + (bankUtils.contains(id, 1) ? bank.quantity(id) : "0"));
 							}
-							
+
 							if(!bankUtils.contains(id, 1) && !invUtils.containsItem(id)){
 								game.sendGameMessage("Failed to find id: " + id);
 								stop();
@@ -764,6 +764,7 @@ public class VorkathPlayerPlugin extends iScript {
 						}
 						bankUtils.withdrawAllItem(k);
 					}
+				timeout+=1;
 			});
 		}else{
 			openBank();
