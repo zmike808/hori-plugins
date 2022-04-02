@@ -654,14 +654,13 @@ public class VorkathPlayerPlugin extends iScript {
 								game.sendGameMessage("Banking for:" + client.getItemComposition(id).getName() + ". Found amount: " + (bankUtils.contains(id, 1) ? bank.quantity(id) : "0"));
 							}
 
-							if(!bankUtils.contains(id, 1) && !invUtils.containsItem(id)){
+							if(!bank.contains(id) && !invUtils.containsItem(id)){
 								game.sendGameMessage("Failed to find id: " + id);
 								stop();
 								return;
 							}
 
-							if(client.getItemComposition(id).getName().contains("bolts")
-									&& !invUtils.containsItemAmount(id, inventoryItems.get(id), true, true)){
+							if(client.getItemComposition(id).getName().contains("bolts") && !invUtils.containsItem(id)){
 								log.info(client.getItemComposition(id).getName());
 								bankUtils.withdrawAllItem(id);
 								timeout+=3;
