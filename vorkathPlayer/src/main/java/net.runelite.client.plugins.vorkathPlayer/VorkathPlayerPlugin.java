@@ -886,6 +886,9 @@ public class VorkathPlayerPlugin extends iScript {
 
 		Player player = client.getLocalPlayer();
 
+		if(!isAtVorkath() && prayerUtils.isQuickPrayerActive()){
+			return PRAYER_OFF;
+		}
 		if(isAtVorkath()) {
 
 			iNPC vorkathAlive = game.npcs().withId(NpcID.VORKATH_8061).nearest();
@@ -941,13 +944,15 @@ public class VorkathPlayerPlugin extends iScript {
 			}
 
 			if(shouldDrinkBoost()){
-				if(client.getItemComposition(config.boostPotion().getDose4()).getName().contains("Divine")){
-					if(game.modifiedLevel(Skill.HITPOINTS) > 48 && getFood() != null){
-						return DRINK_BOOST;
-					}
-				}else{
-					if(getWidgetItem(config.boostPotion().getIds()) != null){
-						return DRINK_BOOST;
+				if(getWidgetItem(config.boostPotion().getIds()) != null) {
+					if (client.getItemComposition(config.boostPotion().getDose4()).getName().contains("Divine")) {
+						if (game.modifiedLevel(Skill.HITPOINTS) > 48 && getFood() != null) {
+							return DRINK_BOOST;
+						}
+					} else {
+						if (getWidgetItem(config.boostPotion().getIds()) != null) {
+							return DRINK_BOOST;
+						}
 					}
 				}
 			}
@@ -1011,8 +1016,7 @@ public class VorkathPlayerPlugin extends iScript {
 			}
 
 			if(isVorkathAsleep() && !shouldLoot()
-					&& !player.isMoving() && !shouldDrinkBoost() && !shouldDrinkRestore()
-					&& !shouldDrinkAntifire() && !shouldDrinkVenom() && hasFoodForKill()
+					&& !player.isMoving() && hasFoodForKill()
 					&& game.modifiedLevel(Skill.HITPOINTS) >= game.baseLevel(Skill.HITPOINTS) - 20
 					&& hasPrayerForKill()){
 				return POKE_VORKATH;
@@ -1148,7 +1152,7 @@ public class VorkathPlayerPlugin extends iScript {
 			if (itemValues.containsKey(a.getId())) {
 				value = itemValues.get(a.getId()) * a.getQuantity();
 			} else {
-				itemValues.put(a.getId(), game.getFromClientThread(() -> utils.getItemPrice(a.getId(), true)));
+				itemValues.put(a.getId(), a.getId() == ItemID.VORKATHS_HEAD ? 75000 : utils.getItemPrice(a.getId(), true));
 			}
 			name = game.getFromClientThread(() -> client.getItemComposition(a.getId()).getName()).toLowerCase();
 			return !excludedItems.stream().anyMatch(name::contains) && (includedItems.stream().anyMatch(name::contains) || value >= config.lootValue() || (a.getId() == ItemID.BLUE_DRAGONHIDE + 1) || (config.lootBones() && a.getId() == ItemID.SUPERIOR_DRAGON_BONES) || (config.lootHide() && a.getId() == ItemID.BLUE_DRAGONHIDE));
