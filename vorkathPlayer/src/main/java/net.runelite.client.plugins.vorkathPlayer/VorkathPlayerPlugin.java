@@ -779,6 +779,7 @@ public class VorkathPlayerPlugin extends iScript {
 			Date date = new Date();
 			utils.sendGameMessage("Died at: " + format.format(date));
 			timeout+=2;
+			if(prayerUtils.isQuickPrayerActive()) prayerUtils.toggleQuickPrayer(false, sleepDelay());
 			stop();
 		}
 		if(message.contains(serpHelm)){
@@ -886,9 +887,7 @@ public class VorkathPlayerPlugin extends iScript {
 
 		Player player = client.getLocalPlayer();
 
-		if(!isAtVorkath() && prayerUtils.isQuickPrayerActive()){
-			return PRAYER_OFF;
-		}
+
 		if(isAtVorkath()) {
 
 			iNPC vorkathAlive = game.npcs().withId(NpcID.VORKATH_8061).nearest();
