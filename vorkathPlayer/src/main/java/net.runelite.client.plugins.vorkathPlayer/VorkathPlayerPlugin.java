@@ -1151,7 +1151,7 @@ public class VorkathPlayerPlugin extends iScript {
 			if (itemValues.containsKey(a.getId())) {
 				value = itemValues.get(a.getId()) * a.getQuantity();
 			} else {
-				itemValues.put(a.getId(), a.getId() == ItemID.VORKATHS_HEAD ? 75000 : utils.getItemPrice(a.getId(), true));
+				itemValues.put(a.getId(), a.getId() == ItemID.VORKATHS_HEAD_21907 ? 75000 : utils.getItemPrice(a.getId(), true));
 			}
 			name = game.getFromClientThread(() -> client.getItemComposition(a.getId()).getName()).toLowerCase();
 			return !excludedItems.stream().anyMatch(name::contains) && (includedItems.stream().anyMatch(name::contains) || value >= config.lootValue() || (a.getId() == ItemID.BLUE_DRAGONHIDE + 1) || (config.lootBones() && a.getId() == ItemID.SUPERIOR_DRAGON_BONES) || (config.lootHide() && a.getId() == ItemID.BLUE_DRAGONHIDE));
