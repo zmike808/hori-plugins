@@ -697,7 +697,7 @@ public class VorkathPlayerPlugin extends iScript {
 									actionObject(returnOrb.getId(), MenuAction.GAME_OBJECT_FIRST_OPTION, null);
 								}
 							}else{
-								chatbox.chooseOption("Yes");
+								continueChat();
 								timeout+=13;
 							}
 					}
