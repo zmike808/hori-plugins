@@ -26,7 +26,6 @@ package net.runelite.client.plugins.vorkathPlayer;
 
 import lombok.Getter;
 import net.runelite.api.ItemID;
-import net.runelite.api.ObjectID;
 import net.runelite.api.Skill;
 import net.runelite.client.config.*;
 
@@ -40,15 +39,10 @@ public interface VorkathPlayerConfig extends Config {
         return new Button();
     }
 
-    @ConfigItem(keyName = "showOverlay", name = "Show UI", description = "Show the UI on screen", position = 1)
-    default boolean showOverlay() {
-        return true;
-    }
-
     @ConfigSection(
             name = "Sleep Delays",
             description = "",
-            position = 2,
+            position = 1,
             keyName = "sleepDelays"
     )
     String sleepDelays = "Sleep Delays";
@@ -61,7 +55,7 @@ public interface VorkathPlayerConfig extends Config {
             keyName = "sleepMin",
             name = "Sleep Min",
             description = "",
-            position = 2,
+            position = 3,
             section = sleepDelays
     )
     default int sleepMin() {
@@ -76,7 +70,7 @@ public interface VorkathPlayerConfig extends Config {
             keyName = "sleepMax",
             name = "Sleep Max",
             description = "",
-            position = 3,
+            position = 4,
             section = sleepDelays
     )
     default int sleepMax() {
@@ -91,7 +85,7 @@ public interface VorkathPlayerConfig extends Config {
             keyName = "sleepTarget",
             name = "Sleep Target",
             description = "",
-            position = 4,
+            position = 5,
             section = sleepDelays
     )
     default int sleepTarget() {
@@ -106,7 +100,7 @@ public interface VorkathPlayerConfig extends Config {
             keyName = "sleepDeviation",
             name = "Sleep Deviation",
             description = "",
-            position = 5,
+            position = 6,
             section = sleepDelays
     )
     default int sleepDeviation() {
@@ -117,305 +111,220 @@ public interface VorkathPlayerConfig extends Config {
             keyName = "sleepWeightedDistribution",
             name = "Sleep Weighted Distribution",
             description = "Shifts the random distribution towards the lower end at the target, otherwise it will be an even distribution",
-            position = 6,
+            position = 7,
             section = sleepDelays
     )
     default boolean sleepWeightedDistribution() {
         return false;
     }
 
-    @ConfigSection(
-            name = "Tick Delays",
-            description = "",
-            position = 3,
-            keyName = "tickDelays"
-    )
-    String tickDelays = "Tick Delays";
 
-    @Range(
-            min = 0,
-            max = 10
-    )
-    @ConfigItem(
-            keyName = "tickDelaysMin",
-            name = "Game Tick Min",
+    @ConfigSection(
+            name = "Gear Setup",
             description = "",
             position = 8,
-            section = tickDelays
-    )
-    default int tickDelaysMin() {
-        return 1;
-    }
-
-    @Range(
-            min = 0,
-            max = 10
-    )
-    @ConfigItem(
-            keyName = "tickDelaysMax",
-            name = "Game Tick Max",
-            description = "",
-            position = 9,
-            section = tickDelays
-    )
-    default int tickDelaysMax() {
-        return 3;
-    }
-
-    @Range(
-            min = 0,
-            max = 10
-    )
-    @ConfigItem(
-            keyName = "tickDelaysTarget",
-            name = "Game Tick Target",
-            description = "",
-            position = 10,
-            section = tickDelays
-    )
-    default int tickDelaysTarget() {
-        return 2;
-    }
-
-    @Range(
-            min = 0,
-            max = 10
-    )
-    @ConfigItem(
-            keyName = "tickDelaysDeviation",
-            name = "Game Tick Deviation",
-            description = "",
-            position = 11,
-            section = tickDelays
-    )
-    default int tickDelaysDeviation() {
-        return 1;
-    }
-
-    @ConfigItem(
-            keyName = "tickDelaysWeightedDistribution",
-            name = "Game Tick Weighted Distribution",
-            description = "Shifts the random distribution towards the lower end at the target, otherwise it will be an even distribution",
-            position = 12,
-            section = tickDelays
-    )
-    default boolean tickDelaysWeightedDistribution() {
-        return false;
-    }
-
-
-    @ConfigSection(
-            name = "Weapons",
-            description = "",
-            position = 4,
             keyName = "weaponsSection"
     )
     String weaponsSection = "Weapons";
 
-    @ConfigItem(keyName = "mainhandID", name = "MH", description = "Your main weapon", position = 1, section = weaponsSection)
+    @ConfigItem(keyName = "mainhandID", name = "MH", description = "Your main weapon", position = 9, section = weaponsSection)
     default Mainhand mainhand() {
         return Mainhand.DRAGON_HUNTER_LANCE;
     }
 
-    @ConfigItem(keyName = "offhandID", name = "OH", description = "Your offhand item", position = 3, section = weaponsSection)
+    @ConfigItem(keyName = "offhandID", name = "OH", description = "Your offhand item", position = 10, section = weaponsSection)
     default Offhand offhand() {
         return Offhand.DRAGON_DEFENDER;
     }
 
-    @ConfigItem(keyName = "useSpec", name = "Spec", description = "Which special attack do you want to use", position = 4, section = weaponsSection)
+    @ConfigItem(keyName = "useSpec", name = "Spec", description = "Which special attack do you want to use", position = 11, section = weaponsSection)
     default Spec useSpec() {
         return Spec.BANDOS_GODSWORD;
     }
 
-    @ConfigItem(keyName = "useStaff", name = "Equip staff", description = "Equip a staff for crumble undead<br>Useful if your magic attack is too low", position = 5, section = weaponsSection)
+    @ConfigItem(keyName = "useStaff", name = "Use Staff for minion", description = "Equip a staff for crumble undead<br>Useful if your magic attack is too low", position = 12, section = weaponsSection)
     default boolean useStaff() {
         return true;
     }
 
-    @ConfigItem(keyName = "staffID", name = "Staff ID", description = "The item ID of your magic weapon", position = 6, hidden = true, unhide = "useStaff", section = weaponsSection)
+    @ConfigItem(keyName = "staffID", name = "Staff ID", description = "The item ID of your magic weapon", position = 13, hidden = true, unhide = "useStaff", section = weaponsSection)
     default int staffID() {
         return ItemID.SLAYERS_STAFF;
     }
 
-    @ConfigItem(keyName = "useDragonBolts", name = "Use Dragon bolt versions", description = "Use dragon variations of bolts during the kill", position = 7, section = weaponsSection)
-    default boolean useDragonBolts() {
-        return false;
-    }
-
-    @ConfigItem(keyName = "useDiamond", name = "Use Bolt switches", description = "Swaps between ruby and diamond bolts during kill", position = 7, section = weaponsSection)
-    default boolean useDiamond() {
-        return false;
-    }
-
-    @ConfigItem(keyName = "useRange", name = "Use Range", description = "Use Range during kill", position = 7, section = weaponsSection)
+    @ConfigItem(keyName = "useRange", name = "Use Range", description = "Range master switch", position = 14, section = weaponsSection)
     default boolean useRange() {
         return false;
     }
 
+    @ConfigItem(keyName = "useDragonBolts", name = "Use Dragon bolt versions", description = "Use dragon variations of bolts during the kill", position = 15, section = weaponsSection)
+    default boolean useDragonBolts() {
+        return false;
+    }
+
+    @ConfigItem(keyName = "useSwitches", name = "Use Bolt switches", description = "Swaps between ruby and diamond bolts during kill", position = 16, section = weaponsSection)
+    default boolean useSwitches() {
+        return false;
+    }
+
+
     @ConfigSection(
             name = "Consumables",
             description = "",
-            position = 5,
+            position = 17,
             keyName = "consumablesSection"
     )
     String consumablesSection = "Consumables";
 
-    @ConfigItem(keyName = "foodID", name = "Food", description = "The name of your food", position = 1, section = consumablesSection)
+    @ConfigItem(keyName = "foodID", name = "Food", description = "The name of your food", position = 18, section = consumablesSection)
     default Food food() {
-        return Food.MANTA_RAY;
+        return Food.ANGLERFISH;
     }
 
     @Range(min = 1, max = 28)
-    @ConfigItem(keyName = "withdrawFood", name = "Withdraw food", description = "The amount of food to withdraw when banking", position = 2, section = consumablesSection)
+    @ConfigItem(keyName = "withdrawFood", name = "Withdraw food", description = "The amount of food to bring to Vorkath", position = 19, section = consumablesSection)
     default int withdrawFood() {
         return 14;
     }
 
     @Range(min = 1, max = 14)
-    @ConfigItem(keyName = "minFood", name = "Minimum food", description = "Minimum amount of food to start next kill", position = 3, section = consumablesSection)
+    @ConfigItem(keyName = "minFood", name = "Minimum food", description = "Minimum amount of food needed to start next Vorkath kill", position = 20, section = consumablesSection)
     default int minFood() {
-        return 4;
+        return 3;
     }
 
-    @Range(min = 1, max = 99)
-    @ConfigItem(keyName = "eatAt", name = "Eat at", description = "Eat food when under this HP", position = 4, section = consumablesSection)
+    @Range(min = 33, max = 99)
+    @ConfigItem(keyName = "eatAt", name = "Eat at", description = "Eat food when under this HP", position = 21, section = consumablesSection)
     default int eatAt() {
-        return 35;
+        return 39;
     }
 
-    @ConfigItem(keyName = "overEat", name = "Overeat at bank", description = "Eat to above your max HP at the bank with anglerfish", position = 5, section = consumablesSection)
+    @ConfigItem(keyName = "overEat", name = "Use resources at bank", description = "Will over eat at the bank if using Anglerfish<br>Will also restore prayer points and health if not using a POH pool", position = 22, section = consumablesSection)
     default boolean overEat() {
         return false;
     }
 
-    @ConfigItem(keyName = "eatWoox", name = "Eat while woox walking", description = "Could cause clashing, turn off if it dies", position = 7, section = consumablesSection)
+    @ConfigItem(keyName = "eatWoox", name = "Eat while 1 tick walking", description = "Will override the eat function to allow eating while 1 tick walking.<br>Best used in combination with invokes", position = 23, section = consumablesSection)
     default boolean eatWoox() {
         return false;
     }
 
-    @ConfigItem(keyName = "prayerID", name = "Prayer restore", description = "The name of your prayer restore", position = 10, section = consumablesSection)
+    @ConfigItem(keyName = "prayerID", name = "Prayer restore", description = "Type of prayer point restore potion", position = 24, section = consumablesSection)
     default Prayer prayer() {
-        return Prayer.SUPER_RESTORE;
+        return Prayer.PRAYER_POTION;
     }
 
     @Range(min = 1, max = 8)
-    @ConfigItem(keyName = "prayerAmount", name = "Prayer pots", description = "Quantity of prayer restores to bring", position = 11, section = consumablesSection)
+    @ConfigItem(keyName = "prayerAmount", name = "Prayer pots", description = "Quantity of prayer point restores to bring", position = 25, section = consumablesSection)
     default int prayerAmount() {
         return 4;
     }
 
     @Range(min = 1, max = 99)
-    @ConfigItem(keyName = "restoreAt", name = "Drink prayer at", description = "Drink prayer restore when under this amount of prayer", position = 12, section = consumablesSection)
+    @ConfigItem(keyName = "restoreAt", name = "Drink prayer at", description = "Drink prayer point restores when under this amount of prayer", position = 26, section = consumablesSection)
     default int restoreAt() {
-        return 20;
+        return 15;
     }
 
-    @ConfigItem(keyName = "antifireID", name = "Antifire", description = "The name of your antifire potion", position = 14, section = consumablesSection)
+    @ConfigItem(keyName = "antifireID", name = "Antifire", description = "The name of your Antifire potion", position = 27, section = consumablesSection)
     default Antifire antifire() {
         return Antifire.EXT_SUPER_ANTIFIRE;
     }
 
-    @ConfigItem(keyName = "antivenomID", name = "Antivenom", description = "The name of your antivenom potion", position = 15, section = consumablesSection)
+    @ConfigItem(keyName = "antivenomID", name = "Antivenom", description = "The name of your Antivenom potion", position = 28, section = consumablesSection)
     default Antivenom antivenom() {
         return Antivenom.SERPENTINE_HELM;
     }
 
-    @ConfigItem(keyName = "superCombatID", name = "Boost", description = "The name of your super combat pot", position = 16, section = consumablesSection)
+    @ConfigItem(keyName = "superCombatID", name = "Boost", description = "The name of your boost potion", position = 29, section = consumablesSection)
     default BoostPotion boostPotion() {
         return BoostPotion.DIVINE_SUPER_COMBAT;
     }
 
-    @ConfigItem(keyName = "boostLevel", name = "Re-boost at", description = "The level to drink a super combat pot at", position = 17, section = consumablesSection)
+    @ConfigItem(keyName = "boostLevel", name = "Re-boost at", description = "The level to drink a super combat pot at", position = 30, section = consumablesSection)
     default int boostLevel() {
         return 70;
     }
 
     @ConfigSection(
-            name = "Teleports + PoH",
+            name = "Teleports",
             description = "",
-            position = 6,
+            position = 31,
             keyName = "teleportsSection"
     )
     String teleportsSection = "Teleports";
 
-    @ConfigItem(keyName = "houseTele", name = "PoH", description = "The name of your house teleport", position = 19, section = teleportsSection)
+    @ConfigItem(keyName = "houseTele", name = "PoH", description = "The name of your house teleport", position = 32, section = teleportsSection)
     default HouseTele houseTele() { return HouseTele.HOUSE_TELEPORT; }
 
-    @ConfigItem(keyName = "pouchID", name = "Rune Pouch ID", description = "ID of rune pouch", position = 20, section = teleportsSection)
+    @ConfigItem(keyName = "pouchID", name = "Rune Pouch ID", description = "ID of rune pouch", position = 33, section = teleportsSection)
     default int pouchID() { return ItemID.RUNE_POUCH; }
 
-    @ConfigItem(keyName = "usePool", name = "Use PoH pool", description = "Use POH rejuvenation pool", position = 21, section = teleportsSection)
+    @ConfigItem(keyName = "usePool", name = "Use PoH pool", description = "Use POH rejuvenation pool", position = 34, section = teleportsSection)
     default boolean usePool() {
         return true;
     }
 
-    @ConfigItem(keyName = "poolID", name = "Pool ID", description = "Game Object ID for pool in PoH", hidden = true, unhide = "usePool", position = 22, section = teleportsSection)
-    default int poolID() {
-        return 29241;
-    }
-
-    @ConfigItem(keyName = "cMoonClanTele", name = "Lunar Isle ID", description = "Game Object ID for Lunar Isle teleport", position = 23, section = teleportsSection)
-    default int moonclanTeleport() {
-        return ObjectID.PORTAL_NEXUS_33402;
-    }
-
-    @ConfigItem(keyName = "rellekkaTele", name = "Rellekka", description = "The method of travelling to Rellekka after banking", position = 24, section = teleportsSection)
+    @ConfigItem(keyName = "rellekkaTele", name = "Rellekka", description = "The method of travelling to Rellekka after banking", position = 35, section = teleportsSection)
     default RellekkaTele rellekkaTeleport() { return RellekkaTele.TALK_TO_BANKER; }
 
     @ConfigSection(
             name = "Loot",
             description = "",
-            position = 7,
+            position = 36,
             keyName = "lootSection"
     )
     String lootSection = "Loot";
 
-    @ConfigItem(keyName = "lootBones", name = "Loot Superior dragon bones", description = "", position = 992, section = lootSection)
+    @ConfigItem(keyName = "lootBones", name = "Loot Superior dragon bones", description = "", position = 37, section = lootSection)
     default boolean lootBones() {
         return true;
     }
 
-    @ConfigItem(keyName = "lootBonesIfRoom", name = "Loot Superior dragon bones only if you have room", description = "", hidden = true, unhide = "lootBones", position = 993, section = lootSection)
+    @ConfigItem(keyName = "lootBonesIfRoom", name = "Loot Superior dragon bones only if you have room.", description = "", hidden = true, unhide = "lootBones", position = 38, section = lootSection)
     default boolean lootBonesIfRoom() {
         return false;
     }
 
-    @ConfigItem(keyName = "lootUnnotedHide", name = "Loot Un-noted dragonhide", description = "", position = 994, section = lootSection)
-    default boolean lootHide() {
-        return false;
-    }
-
-    @ConfigItem(keyName = "eatLoot", name = "Eat food to loot", description = "", position = 995, section = lootSection)
+    @ConfigItem(keyName = "eatLoot", name = "Loot Prioritization", description = "Prioritizes loot over food.<br>Not to be confused with automatic loot filtering by value!", position = 39, section = lootSection)
     default boolean eatLoot() {
         return true;
     }
 
-    @ConfigItem(keyName = "lootValue", name = "Item value to loot", description = "Loot items over this value", position = 996, section = lootSection)
+    @ConfigItem(keyName = "lootValue", name = "Minimum value of loot", description = "Loot drops over this value.", position = 40, section = lootSection)
     default int lootValue() {
         return 25000;
     }
 
-    @ConfigItem(keyName = "includedItems", name = "Included items", description = "Full or partial names of items to loot regardless of value<br>Seperate with a comma", position = 997, section = lootSection)
+    @ConfigItem(keyName = "includedItems", name = "Included items", description = "Full or partial names of items to loot regardless of value<br>Separate with a comma.", position = 41, section = lootSection)
     default String includedItems() {
-        return "rune longsword";
+        return "rune longsword,wrath rune";
     }
 
-    @ConfigItem(keyName = "excludedItems", name = "Excluded items", description = "Full or partial names of items to NOT loot<br>Seperate with a comma", position = 998, section = lootSection)
+    @ConfigItem(keyName = "excludedItems", name = "Excluded items", description = "Full or partial names of items not to loot<br>Separate with a comma.", position = 42, section = lootSection)
     default String excludedItems() {
         return "ruby bolt,diamond bolt,emerald bolt,dragonstone bolt";
     }
 
-    @ConfigItem(keyName = "invokes", name = "Use invokes (use with caution)", description = "Use at your own risk :)", position = 1000)
+    @ConfigSection(
+            name = "Advanced",
+            description = "",
+            position = 43,
+            keyName = "advanced"
+    )
+    String advancedSection = "Advanced";
+
+    @ConfigItem(keyName = "invokes", name = "Use invokes*", description = "Increased *speculated* risk, use at your own risk.", position = 44, section = advancedSection)
     default boolean invokes() {
         return false;
     }
 
-    @ConfigItem(keyName = "debug", name = "Debug Messages", description = "", position = 1001)
+    @ConfigItem(keyName = "debug", name = "Debug Messages", description = "", position = 45, section = advancedSection)
     default boolean debug() {
         return false;
     }
 
-    @ConfigItem(keyName = "walkMethod", name = "Walk Method", description = "Acid phase method", position = 1002)
+    @ConfigItem(keyName = "walkMethod", name = "Acid Walk", description = "Acid walk method", position = 46, section = advancedSection)
     default walkMethod walkMethod() { return walkMethod.WOOX_ACID_MELEE; }
 
     enum Mainhand {

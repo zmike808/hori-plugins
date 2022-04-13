@@ -25,10 +25,10 @@ import ProjectVersions.openosrsVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "1.2.5"
+version = "1.2.6"
 
 project.extra["PluginName"] = "Vorkath Player" // This is the name that is used in the external plugin manager panel
-project.extra["PluginDescription"] = "Automatic Vorkath" // This is the description that is used in the external plugin manager panel
+project.extra["PluginDescription"] = "Plays vorkath" // This is the description that is used in the external plugin manager panel
 
 dependencies {
     annotationProcessor(Libraries.lombok)

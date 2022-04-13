@@ -5,7 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.*;
+import net.runelite.api.events.AnimationChanged;
+import net.runelite.api.events.GameTick;
+import net.runelite.api.events.ProjectileMoved;
+import net.runelite.api.events.ProjectileSpawned;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.api.widgets.WidgetItem;
@@ -14,13 +17,11 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.iutils.*;
-import net.runelite.client.plugins.iutils.game.*;
+import net.runelite.client.plugins.iutils.game.Game;
 import net.runelite.client.plugins.iutils.scripts.iScript;
-import net.runelite.client.plugins.iutils.ui.Chatbox;
 import org.pf4j.Extension;
 
 import javax.inject.Inject;
-
 import java.util.*;
 
 import static net.runelite.api.GraphicID.VORKATH_BOMB_AOE;
@@ -287,10 +288,10 @@ public class VorkathHelperPlugin extends iScript {
 
 				break;
 			case SWITCH_RUBY:
-				wearItem(getWidgetItem(RUBY_SET), MenuAction.ITEM_SECOND_OPTION);
+				useItem(getWidgetItem(RUBY_SET), MenuAction.ITEM_SECOND_OPTION);
 				break;
 			case SWITCH_DIAMOND:
-				wearItem(getWidgetItem(DIAMOND_SET), MenuAction.ITEM_SECOND_OPTION);
+				useItem(getWidgetItem(DIAMOND_SET), MenuAction.ITEM_SECOND_OPTION);
 				break;
 			case RETALIATE:
 				attackVorkath();
@@ -615,10 +616,11 @@ public class VorkathHelperPlugin extends iScript {
 		return null;
 	}
 
-	public void wearItem(WidgetItem item, MenuAction action){
-		if (item != null && isItemEquipped(item.getId()) && invUtils.containsItem(item.getId()))
+	/*public void wearItem(WidgetItem item, MenuAction action){
+		if (item != null && invUtils.containsItem(item.getId()))
 				utils.doItemActionMsTime(item, action.getId(), 9764864, sleepDelay());
 	}
+	 */
 
 	private void useItem(WidgetItem item, MenuAction action) {
 		if (item != null) {
