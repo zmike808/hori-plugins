@@ -35,5 +35,8 @@ public enum VorkathPlayerStates {
     USE_OBSTACLE,
     WITHDRAW_INVENTORY,
     RECHARGE_HELM,
+    LOW_RUNES,
+    USE_ALTAR,
+    SPELLBOOK_STOP,
     TIMEOUT;
 }

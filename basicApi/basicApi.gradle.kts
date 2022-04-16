@@ -25,10 +25,10 @@ import ProjectVersions.openosrsVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "1.2.8"
+version = "1.0.0"
 
-project.extra["PluginName"] = "Vorkath Player" // This is the name that is used in the external plugin manager panel
-project.extra["PluginDescription"] = "Plays vorkath" // This is the description that is used in the external plugin manager panel
+project.extra["PluginName"] = "Basic API" // This is the name that is used in the external plugin manager panel
+project.extra["PluginDescription"] = "Basic API" // This is the description that is used in the external plugin manager panel
 
 dependencies {
     annotationProcessor(Libraries.lombok)
@@ -36,9 +36,7 @@ dependencies {
 
     compileOnly("com.openosrs:runelite-api:$openosrsVersion+")
     compileOnly("com.openosrs:runelite-client:$openosrsVersion+")
-    compileOnly(group = "com.openosrs.externals", name = "basicApi", version = "1.0.0+");
     compileOnly(group = "com.openosrs.externals", name = "iutils", version = "4.8.2+");
-
 
     compileOnly(Libraries.guice)
     compileOnly(Libraries.lombok)
@@ -54,8 +52,7 @@ tasks {
                     "Plugin-Provider" to project.extra["PluginProvider"],
                     "Plugin-Dependencies" to
                         arrayOf(
-                            nameToId("iUtils"),
-                            nameToId("basicApi")
+                            nameToId("iUtils")
                         ).joinToString(),
                     "Plugin-Description" to project.extra["PluginDescription"],
                     "Plugin-License" to project.extra["PluginLicense"]

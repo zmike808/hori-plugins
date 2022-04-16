@@ -36,6 +36,7 @@ dependencies {
 
     compileOnly("com.openosrs:runelite-api:$openosrsVersion+")
     compileOnly("com.openosrs:runelite-client:$openosrsVersion+")
+    compileOnly(group = "com.openosrs.externals", name = "basicApi", version = "1.0.0+");
     compileOnly(group = "com.openosrs.externals", name = "iutils", version = "4.8.2+");
 
     compileOnly(Libraries.guice)
@@ -52,7 +53,8 @@ tasks {
                     "Plugin-Provider" to project.extra["PluginProvider"],
                     "Plugin-Dependencies" to
                         arrayOf(
-                            nameToId("iUtils")
+                            nameToId("iUtils"),
+                            nameToId("basicApi")
                         ).joinToString(),
                     "Plugin-Description" to project.extra["PluginDescription"],
                     "Plugin-License" to project.extra["PluginLicense"]

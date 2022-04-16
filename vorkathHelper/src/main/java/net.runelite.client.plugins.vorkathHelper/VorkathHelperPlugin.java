@@ -16,6 +16,8 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.basicapi.BasicApiPlugin;
+import net.runelite.client.plugins.basicapi.PrayerUtils;
 import net.runelite.client.plugins.iutils.*;
 import net.runelite.client.plugins.iutils.game.Game;
 import net.runelite.client.plugins.iutils.scripts.iScript;
@@ -31,6 +33,7 @@ import static net.runelite.api.ObjectID.ACID_POOL_32000;
 
 @Extension
 @PluginDependency(iUtils.class)
+@PluginDependency(BasicApiPlugin.class)
 @PluginDescriptor(
 	name = "Vorkath Assistant",
 	description = "Automatic Vorkath",
@@ -198,7 +201,7 @@ public class VorkathHelperPlugin extends iScript {
 					return;
 				}
 				if(prayerUtils.isQuickPrayerActive() && config.enablePrayer()){ //Turns pray off during this phase *Could probably rearrange getState to have it toggle prayer off there, will change up later.
-					prayerUtils.toggleQuickPrayer(false, sleepDelay());
+					prayerUtils.toggleQuickPrayer(true, false, sleepDelay());
 					return;
 				}
 				if(iceMinion != null && player.getInteracting() == null) {
@@ -296,10 +299,10 @@ public class VorkathHelperPlugin extends iScript {
 			case RETALIATE:
 				attackVorkath();
 			case QUICKPRAYER_ON:
-				if(!prayerUtils.isQuickPrayerActive() && prayerUtils.getPoints() > 0) prayerUtils.toggleQuickPrayer(true, sleepDelay());
+				if(!prayerUtils.isQuickPrayerActive() && prayerUtils.getRemainingPoints() > 0) prayerUtils.toggleQuickPrayer(true, true, sleepDelay());
 				break;
 			case QUICKPRAYER_OFF:
-				if(prayerUtils.isQuickPrayerActive()) prayerUtils.toggleQuickPrayer(false, sleepDelay());
+				if(prayerUtils.isQuickPrayerActive()) prayerUtils.toggleQuickPrayer(true, false, sleepDelay());
 				break;
 			case DEFAULT:
 				break;
@@ -406,14 +409,14 @@ public class VorkathHelperPlugin extends iScript {
 			return VorkathStates.SWITCH_DIAMOND;
 
 		if(config.enablePrayer() && isAtVorkath() && prayerUtils.isQuickPrayerActive()
-				&& prayerUtils.getPoints() > 0
+				&& prayerUtils.getRemainingPoints() > 0
 				&& (isVorkathAsleep()
 				|| (vorkathAlive != null && vorkathAlive.isDead())
 				|| isMinion
 				|| isAcid))
 			return VorkathStates.QUICKPRAYER_OFF;
 
-		if(config.enablePrayer() && prayerUtils.getPoints() > 0 && isAtVorkath() && !prayerUtils.isQuickPrayerActive()
+		if(config.enablePrayer() && prayerUtils.getRemainingPoints() > 0 && isAtVorkath() && !prayerUtils.isQuickPrayerActive()
 				&& ((vorkathAlive != null
 				&& !vorkathAlive.isDead()
 				&& !isAcid

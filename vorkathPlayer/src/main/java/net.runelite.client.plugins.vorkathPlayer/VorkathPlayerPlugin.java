@@ -14,9 +14,11 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.basicapi.BasicApiPlugin;
+import net.runelite.client.plugins.basicapi.PrayerUtils;
 import net.runelite.client.plugins.iutils.*;
+import net.runelite.client.plugins.iutils.api.SpellBook;
 import net.runelite.client.plugins.iutils.game.*;
-import net.runelite.client.plugins.iutils.scene.Position;
 import net.runelite.client.plugins.iutils.scripts.iScript;
 import net.runelite.client.plugins.iutils.ui.Chatbox;
 import org.pf4j.Extension;
@@ -24,8 +26,8 @@ import org.pf4j.Extension;
 import javax.inject.Inject;
 import java.awt.*;
 import java.text.SimpleDateFormat;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static net.runelite.api.GraphicID.VORKATH_BOMB_AOE;
@@ -34,6 +36,7 @@ import static net.runelite.api.ObjectID.ACID_POOL_32000;
 import static net.runelite.client.plugins.vorkathPlayer.VorkathPlayerStates.*;
 
 @Extension
+@PluginDependency(BasicApiPlugin.class)
 @PluginDependency(iUtils.class)
 @PluginDescriptor(
 	name = "Vorkath Player",
@@ -51,9 +54,6 @@ public class VorkathPlayerPlugin extends iScript {
 
 	@Inject
 	private Chatbox chatbox;
-
-	@Inject
-	private PrayerUtils prayerUtils;
 
 	@Inject
 	private iUtils utils;
@@ -80,7 +80,14 @@ public class VorkathPlayerPlugin extends iScript {
 	private Game game;
 
 	@Inject
+	private SpellBook spellBook;
+
+	@Inject
 	private CalculationUtils calc;
+
+	@Inject
+	private PrayerUtils prayerUtils;
+
 
 	private LegacyMenuEntry targetMenu;
 
@@ -227,28 +234,6 @@ public class VorkathPlayerPlugin extends iScript {
 		final Widget runWidget = client.getWidget(WidgetInfo.MINIMAP_RUN_ORB);
 		final Widget prayerWidget = client.getWidget(WidgetInfo.MINIMAP_QUICK_PRAYER_ORB);
 
-		if(gotPet){
-			if(!isInPOH() || isAtVorkath()){
-				teleToPoH();
-			}else{
-				stop();
-			}
-			return;
-		}
-
-		if(hasDied){
-			if(prayerUtils.isQuickPrayerActive()){
-				prayerUtils.toggleQuickPrayer(false, sleepDelay());
-			}else{
-				stop();
-			}
-		}
-
-		if(timeout > 0){
-			--timeout;
-			return;
-		}
-
 		final Player player = client.getLocalPlayer();
 		final LocalPoint playerLocal = player.getLocalLocation();
 		final WorldPoint playerWorld = player.getWorldLocation();
@@ -272,9 +257,41 @@ public class VorkathPlayerPlugin extends iScript {
 			safeVorkathTiles.clear();
 		}
 
-		if(config.debug()){
+		if(gotPet){
+			if(!isInPOH() || isAtVorkath()){
+				teleToPoH();
+			}else{
+				stop();
+			}
+			return;
+		}
+
+		if(hasDied){
+			if(prayerUtils.isQuickPrayerActive()){
+				prayerUtils.toggleQuickPrayer(config.invokes(), false, sleepDelay());
+			}else{
+				stop();
+			}
+		}
+
+		if(timeout > 0){
+			--timeout;
+			return;
+		}
+
+		if(config.debug())
 			game.sendGameMessage("State: " + String.valueOf(getState()));
 
+		//IMPORTANT CHECKS MOVED OUTSIDE OTHER LOGIC
+		switch (getState()){
+			case LOW_RUNES:
+				game.sendGameMessage("PROBLEM: Incorrect / low runes. Please use Law/Chaos/Dust and have more than 100 of each.");
+				stop();
+				break;
+			case SPELLBOOK_STOP:
+				game.sendGameMessage("PROBLEM: Incorrect spellbook. Please switch to the normal spellbook.");
+				stop();
+				break;
 		}
 
 		if(isAtVorkath()){
@@ -309,11 +326,11 @@ public class VorkathPlayerPlugin extends iScript {
 					toggleRun();
 					break;
 				case PRAYER_ON:
-					if(!prayerUtils.isQuickPrayerActive() && prayerUtils.getPoints() > 0) prayerUtils.toggleQuickPrayer(true, sleepDelay());
+					if(!prayerUtils.isQuickPrayerActive() && prayerUtils.getRemainingPoints() > 0) prayerUtils.toggleQuickPrayer(config.invokes(), true, sleepDelay());
 					break;
 				case PRAYER_OFF:
 					if(prayerUtils.isQuickPrayerActive())
-						prayerUtils.toggleQuickPrayer(false, sleepDelay());
+						prayerUtils.toggleQuickPrayer(config.invokes(), false, sleepDelay());
 
 					break;
 				case EQUIP_MH:
@@ -323,8 +340,12 @@ public class VorkathPlayerPlugin extends iScript {
 					useItem(getWidgetItem(Set.of(getOffhandId())), MenuAction.ITEM_SECOND_OPTION);
 					break;
 				case EQUIP_SPEC:
-					if(invUtils.isFull() && getOffhandId() != -1){
+					//if(invUtils.isFull() && getOffhandId() != -1){
+					if(config.useSpec().getHands() == 2 && invUtils.getEmptySlots() < 1){
 						if(getFood() != null){
+							if(config.debug()){
+								game.sendGameMessage("DEBUG: Eating food for spec");
+							}
 							useItem(getFood(), MenuAction.ITEM_FIRST_OPTION);
 							return;
 						}
@@ -415,10 +436,10 @@ public class VorkathPlayerPlugin extends iScript {
 
 							if(acidFreePath.contains(player.getWorldLocation())){
 								if(player.getWorldLocation().equals(firstTile)){
-									walkUtils.sceneWalk(lastTile, 0, sleepDelay());
+									walkUtils.sceneWalk(lastTile, 0, calc.getRandomIntBetweenRange(20, 70));
 								}
 								if(player.getWorldLocation().equals(lastTile)){
-									walkUtils.sceneWalk(firstTile, 0, sleepDelay());
+									walkUtils.sceneWalk(firstTile, 0, calc.getRandomIntBetweenRange(20, 70));
 								}
 							}else if(!player.isMoving()){
 								walkUtils.sceneWalk(lastTile, 0, 0);
@@ -468,7 +489,7 @@ public class VorkathPlayerPlugin extends iScript {
 					}
 
 					if(prayerUtils.isQuickPrayerActive()){
-						prayerUtils.toggleQuickPrayer(false, sleepDelay());
+						prayerUtils.toggleQuickPrayer(config.invokes(), false, sleepDelay());
 						return;
 					}
 
@@ -512,14 +533,22 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 		else if (isInPOH()){
 			if(prayerUtils.isQuickPrayerActive()){
-				prayerUtils.toggleQuickPrayer(false, sleepDelay());
+				prayerUtils.toggleQuickPrayer(config.invokes(),false, sleepDelay());
 				return;
 			}
-
 
 			switch (getState()){
 				case TOGGLE_RUN:
 					toggleRun();
+					break;
+				case USE_ALTAR:
+					iObject altarObject = game.objects().filter(a -> {
+						return a.name().contains("altar") && a.actions().contains("Pray");
+					}).nearest();
+
+					if(altarObject != null && !player.isMoving())
+						actionObject(altarObject.id(), MenuAction.GAME_OBJECT_FIRST_OPTION, null);
+
 					break;
 				case USE_POOL:
 
@@ -548,7 +577,7 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 		else if(isNearBank()){
 			if(prayerUtils.isQuickPrayerActive()){
-				prayerUtils.toggleQuickPrayer(false, sleepDelay());
+				prayerUtils.toggleQuickPrayer(config.invokes(), false, sleepDelay());
 				return;
 			}
 
@@ -723,7 +752,7 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 		else{
 			if(prayerUtils.isQuickPrayerActive()){
-				prayerUtils.toggleQuickPrayer(false, sleepDelay());
+				prayerUtils.toggleQuickPrayer(config.invokes(), false, sleepDelay());
 				return;
 			}
 
@@ -910,6 +939,13 @@ public class VorkathPlayerPlugin extends iScript {
 
 		Player player = client.getLocalPlayer();
 
+		if(SpellBook.getCurrentSpellBook(game) != SpellBook.Type.STANDARD){
+			return SPELLBOOK_STOP;
+		}
+
+		if(hasLowRunes()){
+			return LOW_RUNES;
+		}
 
 		if(isAtVorkath()) {
 
@@ -929,7 +965,7 @@ public class VorkathPlayerPlugin extends iScript {
 				}
 			}
 
-			if(!prayerUtils.isQuickPrayerActive() && prayerUtils.getPoints() > 0){
+			if(!prayerUtils.isQuickPrayerActive() && prayerUtils.getRemainingPoints() > 0){
 				if(!isAcid && !isMinion){
 					if(isWakingUp() || (vorkathAlive != null && !vorkathAlive.isDead())){
 						return PRAYER_ON;
@@ -980,7 +1016,7 @@ public class VorkathPlayerPlugin extends iScript {
 			}
 
 			if(shouldDrinkRestore()){
-				if(!invUtils.containsItem(config.prayer().getIds()) && (vorkathAlive != null && !vorkathAlive.isDead()) && prayerUtils.getPoints() == 0) return TELEPORT_TO_POH;
+				if(!invUtils.containsItem(config.prayer().getIds()) && (vorkathAlive != null && !vorkathAlive.isDead()) && prayerUtils.getRemainingPoints() == 0) return TELEPORT_TO_POH;
 				if(getWidgetItem(config.prayer().getIds()) != null){
 					return DRINK_RESTORE;
 				}
@@ -1052,19 +1088,18 @@ public class VorkathPlayerPlugin extends iScript {
 		if(isInPOH()) {
 			if(!playerUtils.isRunEnabled()) return TOGGLE_RUN;
 			if(prayerUtils.isQuickPrayerActive()) return PRAYER_OFF;
+			if(config.useAltar() && game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER))
+				return USE_ALTAR;
 			if (config.usePool() && (game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS)
 					|| game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER)
-					|| client.getVar(VarPlayer.SPECIAL_ATTACK_PERCENT) < 1000)) {
+					|| getSpecialPercent() < 100)) {
 				return USE_POOL;
 			}
 			return USE_PORTAL;
 		}
 
 		if(isNearBank()){
-			if(hasLowRunes()){
-				game.sendGameMessage("Low runes");
-				stop();
-			}
+
 			if(rechargeHelm)
 				return RECHARGE_HELM;
 
@@ -1135,7 +1170,7 @@ public class VorkathPlayerPlugin extends iScript {
 	}
 
 	public boolean shouldDrinkRestore(){
-		return prayerUtils.getPoints() <= config.restoreAt();
+		return prayerUtils.getRemainingPoints() <= config.restoreAt();
 	}
 
 	public boolean isNearBank(){
@@ -1387,11 +1422,11 @@ public class VorkathPlayerPlugin extends iScript {
 	}
 
 	private boolean hasFoodForKill(){
-		return getFood() != null && ((invUtils.getItemCount(config.food().getId(), false) >= config.minFood()) && (invUtils.containsItem(config.prayer().getIds()) || prayerUtils.getPoints() > 70));
+		return getFood() != null && ((invUtils.getItemCount(config.food().getId(), false) >= config.minFood()) && (invUtils.containsItem(config.prayer().getIds()) || prayerUtils.getRemainingPoints() > 70));
 	}
 
 	private boolean hasPrayerForKill(){
-		return invUtils.containsItem(config.prayer().getIds()) || prayerUtils.getPoints() > 65;
+		return invUtils.containsItem(config.prayer().getIds()) || prayerUtils.getRemainingPoints() > 65;
 	}
 
 	private int getSpecialPercent(){
@@ -1651,16 +1686,5 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 	}
 
-	public boolean hasRigour(){
-		return game.varb(5451) != 0;
-	}
-
-	public boolean hasPiety(){
-		return game.varb(3909) == 8;
-	}
-
-	public boolean areBoostsActive(){
-		return game.varb(Prayer.RIGOUR.getVarbit().getId()) == 1 || game.varb(Prayer.PIETY.getVarbit().getId()) == 1;
-	}
 
 }

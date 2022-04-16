@@ -1,3 +1,5 @@
+import ProjectVersions.openosrsVersion
+
 buildscript {
     repositories {
         gradlePluginPortal()
@@ -5,12 +7,28 @@ buildscript {
 }
 
 plugins {
+    java
     checkstyle
 }
 
 project.extra["GithubUrl"] = "https://github.com/Blogans/hori-plugins"
 
 apply<BootstrapPlugin>()
+
+allprojects {
+    group = "com.openosrs.externals"
+    apply<MavenPublishPlugin>()
+}
+
+allprojects {
+    apply<MavenPublishPlugin>()
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+}
 
 subprojects {
     group = "com.openosrs.externals"
@@ -38,9 +56,38 @@ subprojects {
 
     apply<JavaPlugin>()
 
+    dependencies {
+        annotationProcessor(Libraries.lombok)
+        annotationProcessor(Libraries.pf4j)
+
+        compileOnly("com.openosrs:http-api:$openosrsVersion+")
+        compileOnly("com.openosrs:runelite-api:$openosrsVersion+")
+        compileOnly("com.openosrs:runelite-client:$openosrsVersion+")
+        compileOnly("com.openosrs.rs:runescape-api:$openosrsVersion+")
+
+        compileOnly(Libraries.guice)
+        compileOnly(Libraries.lombok)
+        compileOnly(Libraries.pf4j)
+
+
+    }
+
     configure<JavaPluginConvention> {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    configure<PublishingExtension> {
+        repositories {
+            maven {
+                url = uri("$buildDir/repo")
+            }
+        }
+        publications {
+            register("mavenJava", MavenPublication::class) {
+                from(components["java"])
+            }
+        }
     }
 
     tasks {
@@ -77,4 +124,7 @@ subprojects {
             from(configurations["runtimeClasspath"])
         }
     }
+}
+repositories {
+    mavenCentral()
 }
