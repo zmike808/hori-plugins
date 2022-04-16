@@ -543,7 +543,7 @@ public class VorkathPlayerPlugin extends iScript {
 					break;
 				case USE_ALTAR:
 					iObject altarObject = game.objects().filter(a -> {
-						return a.name().contains("altar") && a.actions().contains("Pray");
+						return a.name().contains("Altar") && a.actions().contains("Pray");
 					}).nearest();
 
 					if(altarObject != null && !player.isMoving())
