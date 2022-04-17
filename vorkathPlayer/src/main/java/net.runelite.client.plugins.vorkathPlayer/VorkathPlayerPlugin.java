@@ -15,6 +15,7 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.basicapi.BasicApiPlugin;
+import net.runelite.client.plugins.basicapi.InventoryUtils;
 import net.runelite.client.plugins.basicapi.PrayerUtils;
 import net.runelite.client.plugins.iutils.*;
 import net.runelite.client.plugins.iutils.api.SpellBook;
@@ -1615,9 +1616,12 @@ public class VorkathPlayerPlugin extends iScript {
 		if(!invUtils.containsItem(config.pouchID())) return false;
 
 		int law = invUtils.runePouchQuanitity(ItemID.LAW_RUNE);
-		int dustEarth = invUtils.runePouchContains(ItemID.DUST_RUNE) ? invUtils.runePouchQuanitity(ItemID.DUST_RUNE) : invUtils.runePouchQuanitity(ItemID.EARTH_RUNE);
+		int dustEarth = invUtils.runePouchContains(ItemID.DUST_RUNE, -1) ? invUtils.runePouchQuanitity(ItemID.DUST_RUNE) : invUtils.runePouchQuanitity(ItemID.EARTH_RUNE);
 		int chaos = invUtils.runePouchQuanitity(ItemID.CHAOS_RUNE);
 
+		log.info("" + law);
+		log.info("" + dustEarth);
+		log.info("" + chaos);
 		return law < 50 || dustEarth < 25 || chaos < 50;
 	}
 

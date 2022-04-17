@@ -30,6 +30,7 @@ public class BasicApiPlugin extends Plugin {
 	@Inject
 	private PrayerUtils prayerUtils;
 
+
 	@Inject
 	private Client client;
 
