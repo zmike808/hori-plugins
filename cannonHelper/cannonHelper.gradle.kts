@@ -52,9 +52,10 @@ tasks {
                     "Plugin-Id" to nameToId(project.extra["PluginName"] as String),
                     "Plugin-Provider" to project.extra["PluginProvider"],
                     "Plugin-Dependencies" to
-                        arrayOf(
-                            nameToId("iUtils")
-                        ).joinToString(),
+                            arrayOf(
+                                nameToId("iUtils"),
+                                nameToId("basicApi")
+                            ).joinToString(),
                     "Plugin-Description" to project.extra["PluginDescription"],
                     "Plugin-License" to project.extra["PluginLicense"]
             ))
