@@ -1,12 +1,11 @@
-package net.runelite.client.plugins.basicapi;
+package net.runelite.client.plugins.basicapi.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.client.plugins.basicapi.BasicApiPlugin;
 import net.runelite.client.plugins.iutils.LegacyMenuEntry;
-import net.runelite.client.plugins.iutils.MenuUtils;
-import net.runelite.client.plugins.iutils.game.Game;
 import net.runelite.client.plugins.iutils.iUtils;
 
 import javax.inject.Inject;
@@ -23,13 +22,10 @@ public class PrayerUtils {
     private Client client;
 
     @Inject
-    private MenuUtils menu;
-
-    @Inject
     private iUtils utils;
 
     @Inject
-    private Game game;
+    private BasicApiPlugin basicApiPlugin;
 
     public int getRemainingPoints(){
         return client.getBoostedSkillLevel(Skill.PRAYER);
@@ -47,33 +43,33 @@ public class PrayerUtils {
         return client.getVarbitValue(Varbits.QUICK_PRAYER) == 1;
     }
 
-    public void toggleQuickPrayer(boolean invokes, boolean active, long timeToDelay){
-        if((active && isQuickPrayerActive()) || !active && !isQuickPrayerActive()) return;
-
+    public void toggleQuickPrayer(boolean active, long timeToDelay){
         Widget widget = client.getWidget(WidgetInfo.MINIMAP_QUICK_PRAYER_ORB);
-        if(widget != null){
-            LegacyMenuEntry prayerToggle = new LegacyMenuEntry(active ? "Activate" : "Deactivate", "Quick-prayers", 1, MenuAction.CC_OP.getId(), -1, widget.getId(), false);
-            Rectangle bounds = widget.getBounds();
-            if(invokes){
-                utils.doInvokeMsTime(prayerToggle, timeToDelay);
-            }else{
-                utils.doActionMsTime(prayerToggle, bounds, timeToDelay);
-            }
+
+        if(widget == null || (active && isQuickPrayerActive()) || !active && !isQuickPrayerActive()) return;
+
+        LegacyMenuEntry prayerToggle = new LegacyMenuEntry(active ? "Activate" : "Deactivate", "", 1, MenuAction.CC_OP, -1, widget.getId(), false);
+        Rectangle bounds = widget.getBounds();
+
+        if(basicApiPlugin.useInvokes()){
+            utils.doInvokeMsTime(prayerToggle, timeToDelay);
+        }else{
+            utils.doActionMsTime(prayerToggle, bounds, timeToDelay);
         }
-        log.info("toggleQuickPray");
     }
 
     public void togglePrayer(boolean invokes, boolean active, Prayer prayer, long timeToDelay){
-        if((active && isActive(prayer)) || !active && !isActive(prayer)) return;
         Widget widget = client.getWidget(prayer.getWidgetInfo());
-        if(widget != null){
-            LegacyMenuEntry prayerToggle = new LegacyMenuEntry(active ? "Activate" : "Deactivate", "", 1, MenuAction.CC_OP.getId(), -1, widget.getId(), false);
-            Rectangle bounds = widget.getBounds();
-            if(invokes){
-                utils.doInvokeMsTime(prayerToggle, timeToDelay);
-            }else{
-                utils.doActionMsTime(prayerToggle, bounds, timeToDelay);
-            }
+
+        if(widget == null || (active && isActive(prayer)) || !active && !isActive(prayer)) return;
+
+        LegacyMenuEntry prayerToggle = new LegacyMenuEntry(active ? "Activate" : "Deactivate", "", 1, MenuAction.CC_OP, -1, widget.getId(), false);
+        Rectangle bounds = widget.getBounds();
+
+        if(invokes){
+            utils.doInvokeMsTime(prayerToggle, timeToDelay);
+        }else{
+            utils.doActionMsTime(prayerToggle, bounds, timeToDelay);
         }
     }
 

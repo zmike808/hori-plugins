@@ -36,6 +36,7 @@ public enum VorkathPlayerStates {
     WITHDRAW_INVENTORY,
     RECHARGE_HELM,
     LOW_RUNES,
+    LOW_BOLTS,
     USE_ALTAR,
     SPELLBOOK_STOP,
     TIMEOUT;

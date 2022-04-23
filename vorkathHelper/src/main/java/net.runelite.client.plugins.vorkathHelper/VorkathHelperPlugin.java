@@ -11,13 +11,13 @@ import net.runelite.api.events.ProjectileMoved;
 import net.runelite.api.events.ProjectileSpawned;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
-import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.basicapi.BasicApiPlugin;
-import net.runelite.client.plugins.basicapi.PrayerUtils;
+import net.runelite.client.plugins.basicapi.utils.Inventory;
+import net.runelite.client.plugins.basicapi.utils.PrayerUtils;
 import net.runelite.client.plugins.iutils.*;
 import net.runelite.client.plugins.iutils.game.Game;
 import net.runelite.client.plugins.iutils.scripts.iScript;
@@ -55,7 +55,7 @@ public class VorkathHelperPlugin extends iScript {
 	private iUtils utils;
 
 	@Inject
-	private InventoryUtils invUtils;
+	private Inventory inventory;
 
 	@Inject
 	private NPCUtils npcUtils;
@@ -74,6 +74,9 @@ public class VorkathHelperPlugin extends iScript {
 
 	@Inject
 	private CalculationUtils calc;
+
+	@Inject
+	private BasicApiPlugin basicApi;
 
 	private final List<WorldPoint> acidSpots;
 	private List<WorldPoint> acidFreePath;
@@ -136,6 +139,7 @@ public class VorkathHelperPlugin extends iScript {
 
 	@Subscribe
 	public void onGameTick(GameTick event){
+
 		if(client.getGameState() != GameState.LOGGED_IN || client.getLocalPlayer() == null) return;
 
 		final Player player = client.getLocalPlayer();
@@ -160,7 +164,6 @@ public class VorkathHelperPlugin extends iScript {
 
 		createSafetiles();
 
-		log.info(String.valueOf(getState()));
 		switch(getState()){
 
 			case TIMEOUT:
@@ -196,12 +199,12 @@ public class VorkathHelperPlugin extends iScript {
 			case KILL_MINION:
 				NPC iceMinion = npcUtils.findNearestNpc(NpcID.ZOMBIFIED_SPAWN_8063);
 
-				if(player.getInteracting() != null && player.getInteracting().getName().equalsIgnoreCase("Vorkath")){ //Stops attacking vorkath
+				if(player.getInteracting() != null && player.getInteracting().getName() != null && player.getInteracting().getName().equalsIgnoreCase("Vorkath")){ //Stops attacking vorkath
 					walkUtils.sceneWalk(localLoc, 0, sleepDelay());
 					return;
 				}
 				if(prayerUtils.isQuickPrayerActive() && config.enablePrayer()){ //Turns pray off during this phase *Could probably rearrange getState to have it toggle prayer off there, will change up later.
-					prayerUtils.toggleQuickPrayer(true, false, sleepDelay());
+					prayerUtils.toggleQuickPrayer( false, sleepDelay());
 					return;
 				}
 				if(iceMinion != null && player.getInteracting() == null) {
@@ -219,8 +222,7 @@ public class VorkathHelperPlugin extends iScript {
 				}
 
 				if(prayerWidget != null && prayerUtils.isQuickPrayerActive() && (config.walkMethod().getId() != 2 || (config.walkMethod().getId() == 2 && player.isMoving()))){
-					utils.doInvokeMsTime(new LegacyMenuEntry("Deactivate", "", 1, MenuAction.CC_OP, -1,
-							10485775, false), 0);
+					prayerUtils.toggleQuickPrayer(false, 0);
 				}
 
 				if(config.walkMethod().getId() == 1) return;
@@ -291,18 +293,20 @@ public class VorkathHelperPlugin extends iScript {
 
 				break;
 			case SWITCH_RUBY:
-				useItem(getWidgetItem(RUBY_SET), MenuAction.ITEM_SECOND_OPTION);
+				inventory.interactWithItem(RUBY_SET.stream().mapToInt(Integer::intValue).toArray(), sleepDelay(), "Wield");
 				break;
 			case SWITCH_DIAMOND:
-				useItem(getWidgetItem(DIAMOND_SET), MenuAction.ITEM_SECOND_OPTION);
+				inventory.interactWithItem(DIAMOND_SET.stream().mapToInt(Integer::intValue).toArray(), sleepDelay(), "Wield");
 				break;
 			case RETALIATE:
 				attackVorkath();
 			case QUICKPRAYER_ON:
-				if(!prayerUtils.isQuickPrayerActive() && prayerUtils.getRemainingPoints() > 0) prayerUtils.toggleQuickPrayer(true, true, sleepDelay());
+				if(!prayerUtils.isQuickPrayerActive() && prayerUtils.getRemainingPoints() > 0)
+					prayerUtils.toggleQuickPrayer( true, sleepDelay());
 				break;
 			case QUICKPRAYER_OFF:
-				if(prayerUtils.isQuickPrayerActive()) prayerUtils.toggleQuickPrayer(true, false, sleepDelay());
+				if(prayerUtils.isQuickPrayerActive())
+					prayerUtils.toggleQuickPrayer( false, sleepDelay());
 				break;
 			case DEFAULT:
 				break;
@@ -396,12 +400,12 @@ public class VorkathHelperPlugin extends iScript {
 			return VorkathStates.ACID_WALK;
 
 		if(config.switchBolts() && vorkathAlive == null
-				&& playerUtils.isItemEquipped(DIAMOND_SET) && invUtils.containsItem(RUBY_SET))
+				&& playerUtils.isItemEquipped(DIAMOND_SET) && inventory.contains(RUBY_SET.stream().mapToInt(Integer::intValue).toArray()))
 			return VorkathStates.SWITCH_RUBY;
 
 		if(config.switchBolts() && vorkathAlive != null && !vorkathAlive.isDead()
 				&& playerUtils.isItemEquipped(RUBY_SET)
-				&& invUtils.containsItem(DIAMOND_SET)
+				&& inventory.contains(DIAMOND_SET.stream().mapToInt(Integer::intValue).toArray())
 				&& calculateHealth(vorkathAlive) > 0
 				&& calculateHealth(vorkathAlive) < 260
 				&& vorkathAlive.getAnimation() != 7960
@@ -448,7 +452,7 @@ public class VorkathHelperPlugin extends iScript {
 	public void attackMinion(){
 		NPC iceMinion = npcUtils.findNearestNpc(NpcID.ZOMBIFIED_SPAWN_8063);
 		if(iceMinion != null && !iceMinion.isDead()) {
-			LegacyMenuEntry entry = new LegacyMenuEntry("Cast", "", iceMinion.getIndex(), MenuAction.SPELL_CAST_ON_NPC.getId(), 0, 0, false);
+			LegacyMenuEntry entry = new LegacyMenuEntry("Cast", "", iceMinion.getIndex(), MenuAction.WIDGET_TARGET_ON_NPC.getId(), 0, 0, false);
 			utils.oneClickCastSpell(WidgetInfo.SPELL_CRUMBLE_UNDEAD, entry, iceMinion.getConvexHull().getBounds(), sleepDelay());
 		}
 	}
@@ -608,29 +612,6 @@ public class VorkathHelperPlugin extends iScript {
 		}
 	}
 
-	public boolean isItemEquipped(int id){
-		return game.equipment().withId(id).exists();
-	}
-
-	private WidgetItem getWidgetItem(Collection c){
-		if(invUtils.containsItem(c)){
-			return invUtils.getWidgetItem(c);
-		}
-		return null;
-	}
-
-	/*public void wearItem(WidgetItem item, MenuAction action){
-		if (item != null && invUtils.containsItem(item.getId()))
-				utils.doItemActionMsTime(item, action.getId(), 9764864, sleepDelay());
-	}
-	 */
-
-	private void useItem(WidgetItem item, MenuAction action) {
-		if (item != null) {
-			LegacyMenuEntry targetMenu = new LegacyMenuEntry("", "", item.getId(), action, item.getIndex(), WidgetInfo.INVENTORY.getId(), false);
-			utils.doActionMsTime(targetMenu, item.getCanvasBounds(), 0);
-		}
-	}
 
 	private int calculateHealth(NPC target) {
 		// Based on OpponentInfoOverlay HP calculation & taken from the default slayer plugin

@@ -28,7 +28,6 @@ rootProject.name = "Hori Plugins"
 include(":vorkathHelper")
 include(":vorkathPlayer")
 include(":cannonHelper")
-include(":corpHelper")
 include(":basicApi")
 
 for (project in rootProject.children) {

@@ -4,25 +4,30 @@ import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
-import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.*;
+import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.ConfigButtonClicked;
+import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.iutils.*;
-import net.runelite.client.plugins.iutils.game.*;
+import net.runelite.client.plugins.basicapi.BasicApiPlugin;
+import net.runelite.client.plugins.basicapi.utils.Inventory;
+import net.runelite.client.plugins.iutils.CalculationUtils;
+import net.runelite.client.plugins.iutils.WalkUtils;
+import net.runelite.client.plugins.iutils.game.Game;
+import net.runelite.client.plugins.iutils.game.iObject;
+import net.runelite.client.plugins.iutils.iUtils;
 import net.runelite.client.plugins.iutils.scene.Position;
 import net.runelite.client.plugins.iutils.scripts.iScript;
-import net.runelite.client.plugins.iutils.ui.Chatbox;
 import org.pf4j.Extension;
 
 import javax.inject.Inject;
-import java.util.Random;
 
 @Extension
 @PluginDependency(iUtils.class)
+@PluginDependency(BasicApiPlugin.class)
 @PluginDescriptor(
 	name = "Cannon Helper",
 	description = "Assists with cannon functions",
@@ -38,7 +43,7 @@ public class CannonHelperPlugin extends iScript {
 	private Client client;
 
 	@Inject
-	private InventoryUtils invUtils;
+	private Inventory inventory;
 
 	@Inject
 	private WalkUtils walkUtils;
@@ -98,7 +103,7 @@ public class CannonHelperPlugin extends iScript {
 
 		Player player = client.getLocalPlayer();
 
-		if(!invUtils.containsItem(ItemID.CANNONBALL) && !invUtils.containsItem(ItemID.GRANITE_CANNONBALL)){
+		if(!inventory.contains(ItemID.CANNONBALL) && !inventory.contains(ItemID.GRANITE_CANNONBALL)){
 			game.sendGameMessage("Stopping plugin: Can't find cannonballs!");
 			stop();
 		}

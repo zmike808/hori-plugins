@@ -25,7 +25,7 @@ import ProjectVersions.openosrsVersion
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "0.0.8"
+version = "1.0.0"
 
 project.extra["PluginName"] = "Vorkath Assistant" // This is the name that is used in the external plugin manager panel
 project.extra["PluginDescription"] = "Helps with Vorkath Fight" // This is the description that is used in the external plugin manager panel
@@ -36,7 +36,7 @@ dependencies {
 
     compileOnly("com.openosrs:runelite-api:$openosrsVersion+")
     compileOnly("com.openosrs:runelite-client:$openosrsVersion+")
-    compileOnly(group = "com.openosrs.externals", name = "basicApi", version = "1.0.0+");
+    compileOnly(group = "com.openosrs.externals", name = "basicApi", version = "1.1.0");
     compileOnly(group = "com.openosrs.externals", name = "iutils", version = "4.8.2+");
 
     compileOnly(Libraries.guice)

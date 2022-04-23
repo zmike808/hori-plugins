@@ -57,10 +57,10 @@ public enum Runes {
     SMOKE(20, SMOKE_RUNE),
     WRATH(21, WRATH_RUNE);
 
-    @Getter(AccessLevel.PACKAGE)
-    private final int id;
-    @Getter(AccessLevel.PACKAGE)
-    private final int itemId;
+    @Getter(AccessLevel.PUBLIC)
+    public final int id;
+    @Getter(AccessLevel.PUBLIC)
+    public final int itemId;
 
     @Getter(AccessLevel.PACKAGE)
     @Setter(AccessLevel.PACKAGE)
@@ -90,4 +90,5 @@ public enum Runes {
         name = name.substring(0, 1) + name.substring(1).toLowerCase();
         return name;
     }
+
 }

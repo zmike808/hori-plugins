@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.basicapi;
+package net.runelite.client.plugins.basicapi.utils;
 
 import net.runelite.api.Client;
 import net.runelite.client.plugins.iutils.MenuUtils;
