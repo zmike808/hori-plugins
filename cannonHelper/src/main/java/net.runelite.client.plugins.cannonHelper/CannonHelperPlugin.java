@@ -26,8 +26,8 @@ import org.pf4j.Extension;
 import javax.inject.Inject;
 
 @Extension
-@PluginDependency(iUtils.class)
 @PluginDependency(BasicApiPlugin.class)
+@PluginDependency(iUtils.class)
 @PluginDescriptor(
 	name = "Cannon Helper",
 	description = "Assists with cannon functions",
