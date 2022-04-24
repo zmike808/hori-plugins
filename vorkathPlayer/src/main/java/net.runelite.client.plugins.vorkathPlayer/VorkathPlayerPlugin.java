@@ -181,7 +181,6 @@ public class VorkathPlayerPlugin extends iScript {
 		isFireball = false;
 		rechargeHelm = false;
 		gotPet = false;
-
 		timeout = 0;
 		specCount = 0;
 
@@ -208,19 +207,19 @@ public class VorkathPlayerPlugin extends iScript {
 
 	@Override
 	protected void onStop() {
-		startPlugin = false;
-		hasDied = false;
 		inventoryItems.clear();
-		timeout = 0;
-		isMinion = false;
-		isAcid = false;
-		isFireball = false;
-		specCount = 0;
-		fireballPoint = null;
-		safeWooxTile = null;
 		acidFreePath .clear();
 		safeVorkathTiles.clear();;
 		acidFreePath.clear();
+		startPlugin = false;
+		hasDied = false;
+		timeout = 0;
+		specCount = 0;
+		isMinion = false;
+		isAcid = false;
+		isFireball = false;
+		fireballPoint = null;
+		safeWooxTile = null;
 		hasSpecced = false;
 		rechargeHelm = false;
 		gotPet = false;
@@ -652,15 +651,18 @@ public class VorkathPlayerPlugin extends iScript {
 							put(getSpecId(), 1);
 						}}, "Wield");
 						timeout+=1;
+						return;
 					}
 
-					if(getSpecId() == -1){
+					if(getSpecId() == -1 && (!isItemEquipped(getMainhandId()) || !isItemEquipped(getOffhandId()))){
 						withdrawUse(new HashMap<Integer, Integer>() {{
-							put(getMainhandId(), 1);
-							if(getOffhandId() != -1) put(getOffhandId(), 1);
+							if(!isItemEquipped(getMainhandId()))
+								put(getMainhandId(), 1);
+							if(getOffhandId() != -1 && !isItemEquipped(getOffhandId()))
+								put(getOffhandId(), 1);
 						}}, "Wield");
-
 						timeout=1;
+						return;
 					}
 					if(config.useRange() && config.useSwitches() && !playerUtils.isItemEquipped(Set.of(RUBY_SET))){
 						withdrawUse(new HashMap<Integer, Integer>() {{
@@ -699,6 +701,8 @@ public class VorkathPlayerPlugin extends iScript {
 					break;
 				case WITHDRAW_INVENTORY:
 					if(inventory.containsExcept(inventoryItems.keySet())){
+						if(config.debug())
+							game.sendGameMessage("Found bad items, clearing inventory");
 						if(bankUtils.isOpen()){
 							bankUtils.depositAll();
 							timeout+=1;
@@ -707,48 +711,44 @@ public class VorkathPlayerPlugin extends iScript {
 						}
 						return;
 					}
-					if(bankUtils.isOpen()) {
-						for (int id : inventoryItems.keySet()) {
 
-							if(!bank.contains(id) && !inventory.contains(id)){
-								game.sendGameMessage("Failed to find id in either inventory or bank: " + client.getItemComposition(id).getName());
-								stop();
-								return;
-							}
-
-							if(client.getItemComposition(id).getName().contains("bolts")){
-								if(!inventory.contains(id)){
-									if(config.debug())
-										game.sendGameMessage("Banking for: " + client.getItemComposition(id).getName());
-
-									if(bank.quantity(id) < 50){
-										game.sendGameMessage("Low bolts, stopping plugin");
-										stop();
-										return;
-									}
-									bankUtils.withdrawAllItem(id);
-									timeout+=3;
-								}else{
-									continue;
-								}
-								return;
-							}else{
-								if (inventory.getCount(false, id) != inventoryItems.get(id)) {
-									if(config.debug())
-										game.sendGameMessage("Banking for:" + client.getItemComposition(id).getName() + ". Found amount: " + (bankUtils.contains(id, 1) ? bank.quantity(id) : "0"));
-
-									if(inventory.getCount( false, id) > inventoryItems.get(id)) {
-										bankUtils.depositAll();
-										return;
-									}
-									bankUtils.withdrawItemAmount(id, (inventoryItems.get(id) - inventory.getCount(true, id)));
-									timeout += inventoryItems.get(id) == 1 ? 0 : 4;
-									return;
-								}
-							}
-						}
-					}else{
+					if(!bankUtils.isOpen()){
 						openBank();
+						return;
+					}
+
+					for(int id : inventoryItems.keySet()){
+
+						String name = client.getItemComposition(id).getName();
+						int amount = inventoryItems.get(id);
+
+
+						if((!bankUtils.contains(id) && !inventory.contains(id)) || ((bankUtils.getQuantity(id) == -1 ? 0 : bankUtils.getQuantity(id)) + inventory.getCount(false,id) < amount) || (name.contains("bolts") && bankUtils.getQuantity(id) + inventory.getCount(true, id) < 50)){
+							game.sendGameMessage("Failed: Couldn't withdraw item: " + name + " for the amount: " + (name.contains("bolts") ? "50" : amount));
+							stop();
+							return;
+						}
+
+						boolean var = name.contains("bolts") ? inventory.contains(id) : inventory.getCount(false, id) == amount;
+
+						if(var)
+							continue;
+
+						if(config.debug())
+							game.sendGameMessage("Banking for item: " + name + " : " + amount);
+
+						if(!name.contains("bolts") && inventory.getCount(false, id) > amount) {
+							bankUtils.depositAll();
+							return;
+						}
+
+						if(name.contains("bolts")){
+							bankUtils.withdrawAllItem(id);
+						}else{
+							bankUtils.withdrawItemAmount(id, amount);
+						}
+						timeout += inventoryItems.get(id) == 1 ? 0 : 4;
+						return;
 					}
 					break;
 				case LEAVE_BANK:
@@ -826,30 +826,25 @@ public class VorkathPlayerPlugin extends iScript {
 
 	public void withdrawList(HashMap<Integer, Integer> list){
 		if(bankUtils.isOpen()){
-			list.forEach((k, v) -> {
-				if(!inventory.contains(k)) {
+			for(int id : list.keySet()){
+				if(!inventory.contains(id)){
 					if(config.debug())
-						game.sendGameMessage("Banking for: " + client.getItemComposition(k).getName());
+						game.sendGameMessage("Banking for: " + client.getItemComposition(id).getName() + " : ID: " + id + " : Amount: " + list.get(id));
 
-					if (v >= 1) {
-						if(!bankUtils.contains(k, v)){
-							game.sendGameMessage("Failed to withdraw item id: " + k + " : item name: " + client.getItemComposition(k).getName());
-							stop();
-							return;
-						}
+					int amount = list.get(id);
+					boolean value = amount == -1 ? bankUtils.contains(id) : bankUtils.contains(id, amount);
 
-						bankUtils.withdrawItemAmount(k, v);
-					} else {
-						if (!bankUtils.contains(k, v) || (client.getItemComposition(k).getName().toLowerCase().contains("bolts") && bank.quantity(k) < 50)) {
-							game.sendGameMessage("Failed to withdraw item id: " + k + " : item name: " + client.getItemComposition(k).getName());
-							stop();
-							return;
-						}
-						bankUtils.withdrawAllItem(k);
+					if(value){
+						if(amount == -1)
+							bankUtils.withdrawAllItem(id);
+						else
+							bankUtils.withdrawItemAmount(id, amount);
+					}else{
+						game.sendGameMessage("Failed to find item: " + client.getItemComposition(id).getName());
+						stop();
 					}
 				}
-				timeout+=2;
-			});
+			}
 		}else{
 			openBank();
 		}

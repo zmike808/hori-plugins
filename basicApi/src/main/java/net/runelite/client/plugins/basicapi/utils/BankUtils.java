@@ -89,6 +89,19 @@ public class BankUtils {
         return false;
     }
 
+    public boolean contains(int id){
+        if(isOpen()){
+            ItemContainer bankItemContainer = client.getItemContainer(InventoryID.BANK);
+
+            for(Item item : bankItemContainer.getItems()){
+                if(item.getId() == id){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     //doesn't NPE
     public boolean containsAnyOf(int... ids) {
         if (isOpen()) {

@@ -31,6 +31,7 @@ import net.runelite.client.config.*;
 
 public interface VorkathHelperConfig extends Config
 {
+
     @ConfigSection(
             keyName = "delayConfig",
             name = "Delay Configuration",
@@ -259,6 +260,10 @@ public interface VorkathHelperConfig extends Config
         return false;
     }
 
+    @ConfigItem(keyName = "startHelper", name = "Start/Stop", description = "", position = 8, title = "startHelper")
+    default Button startHelper() {
+        return new Button();
+    }
 
     enum walkMethod {
         NONE(1),

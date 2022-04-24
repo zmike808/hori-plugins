@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.AnimationChanged;
-import net.runelite.api.events.GameTick;
-import net.runelite.api.events.ProjectileMoved;
-import net.runelite.api.events.ProjectileSpawned;
+import net.runelite.api.events.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
@@ -88,7 +85,7 @@ public class VorkathHelperPlugin extends iScript {
 	private List<WorldPoint> safeMeleeTiles;
 	private boolean isAcid;
 	private boolean isMinion;
-
+	private boolean startPlugin;
 	private final Set<Integer> DIAMOND_SET = Set.of(ItemID.DIAMOND_DRAGON_BOLTS_E, ItemID.DIAMOND_BOLTS_E);
 	private final Set<Integer> RUBY_SET = Set.of(ItemID.RUBY_DRAGON_BOLTS_E, ItemID.RUBY_BOLTS_E);
 
@@ -107,17 +104,20 @@ public class VorkathHelperPlugin extends iScript {
 
 	@Override
 	protected void startUp() {
+		startPlugin = false;
 		log.info("Vorkath Helper startUp");
 	}
 
 	@Override
 	protected void shutDown() {
+		startPlugin = false;
 		log.info("Vorkath Helper shutDown");
 	}
 
 	@Override
 	protected void onStart() {
 		log.info("Vorkath Helper started");
+		startPlugin = true;
 		safeMeleeTiles.clear();
 		dodgeFirebomb = false;
 		timeout = 0;
@@ -126,6 +126,7 @@ public class VorkathHelperPlugin extends iScript {
 	@Override
 	protected void onStop() {
 		log.info("Vorkath Helper stopped");
+		startPlugin = false;
 		isAcid = false;
 		dodgeFirebomb = false;
 		isMinion = false;
@@ -140,7 +141,7 @@ public class VorkathHelperPlugin extends iScript {
 	@Subscribe
 	public void onGameTick(GameTick event){
 
-		if(client.getGameState() != GameState.LOGGED_IN || client.getLocalPlayer() == null) return;
+		if(client.getGameState() != GameState.LOGGED_IN || client.getLocalPlayer() == null || !startPlugin) return;
 
 		final Player player = client.getLocalPlayer();
 		final LocalPoint localLoc = player.getLocalLocation();
@@ -636,6 +637,20 @@ public class VorkathHelperPlugin extends iScript {
 		GameObject pool = objectUtils.findNearestGameObject(ACID_POOL_32000);
 		NPC vorkath = npcUtils.findNearestNpc(NpcID.VORKATH_8061);
 		return pool != null || (vorkath != null && vorkath.getAnimation() == 7957);
+	}
+
+	@Subscribe
+	private void onConfigButtonPressed(ConfigButtonClicked configButtonClicked) {
+		if (!configButtonClicked.getGroup().equalsIgnoreCase("VorkathAssistantConfig"))
+			return;
+
+		if (configButtonClicked.getKey().equalsIgnoreCase("startHelper")) {
+			if (!startPlugin) {
+				start();
+			} else {
+				stop();
+			}
+		}
 	}
 
 }
