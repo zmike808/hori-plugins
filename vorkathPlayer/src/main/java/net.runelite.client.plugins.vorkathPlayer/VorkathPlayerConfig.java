@@ -125,14 +125,14 @@ public interface VorkathPlayerConfig extends Config {
     )
     String weaponsSection = "Weapons";
 
-    @ConfigItem(keyName = "mainhandID", name = "MH", description = "Your main weapon", position = 9, section = weaponsSection)
-    default Mainhand mainhand() {
-        return Mainhand.DRAGON_HUNTER_LANCE;
+    @ConfigItem(keyName = "mainhandID", name = "MH", description = "Your main weapon: Use dev tools (cog on side bar) -> inventory to get item id", position = 9, section = weaponsSection)
+    default int mainhand() {
+        return ItemID.DRAGON_HUNTER_LANCE;
     }
 
-    @ConfigItem(keyName = "offhandID", name = "OH", description = "Your offhand item", position = 10, section = weaponsSection)
-    default Offhand offhand() {
-        return Offhand.DRAGON_DEFENDER;
+    @ConfigItem(keyName = "offhandID", name = "OH", description = "Your offhand item: Use dev tools (cog on side bar) -> inventory to get item id", position = 10, section = weaponsSection)
+    default int offhand() {
+        return ItemID.DRAGON_DEFENDER;
     }
 
     @ConfigItem(keyName = "useSpec", name = "Spec", description = "Which special attack do you want to use", position = 11, section = weaponsSection)

@@ -116,7 +116,7 @@ public class VorkathHelperPlugin extends iScript {
 
 	@Override
 	protected void onStart() {
-		log.info("Vorkath Helper started");
+		game.sendGameMessage("Vorkath Helper started");
 		startPlugin = true;
 		safeMeleeTiles.clear();
 		dodgeFirebomb = false;
@@ -125,7 +125,7 @@ public class VorkathHelperPlugin extends iScript {
 
 	@Override
 	protected void onStop() {
-		log.info("Vorkath Helper stopped");
+		game.sendGameMessage("Vorkath Helper stopped");
 		startPlugin = false;
 		isAcid = false;
 		dodgeFirebomb = false;

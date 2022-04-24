@@ -141,11 +141,11 @@ public class VorkathPlayerPlugin extends iScript {
 	}
 
 	private int getMainhandId(){
-		return config.mainhand().getItemId();
+		return config.mainhand();
 	}
 
 	private int getOffhandId(){
-		return config.offhand().getItemId();
+		return config.offhand();
 	}
 
 	private int getStaffId(){
@@ -1018,7 +1018,8 @@ public class VorkathPlayerPlugin extends iScript {
 			}
 
 			if(shouldEat()){
-				if(getFood() == null && (vorkathAlive != null && !vorkathAlive.isDead())) return TELEPORT_TO_POH;
+				if(getFood() == null && (vorkathAlive != null && !vorkathAlive.isDead()))
+					return TELEPORT_TO_POH;
 				if(inventory.contains(getFoodId()))
 					return EAT_FOOD;
 			}
@@ -1052,7 +1053,8 @@ public class VorkathPlayerPlugin extends iScript {
 			if(shouldDrinkRestore()){
 				if(!inventory.contains(config.prayer().getIds()) && (vorkathAlive != null && !vorkathAlive.isDead()) && prayerUtils.getRemainingPoints() == 0)
 					return TELEPORT_TO_POH;
-				return DRINK_RESTORE;
+				if(inventory.contains(config.prayer().getIds()))
+					return DRINK_RESTORE;
 			}
 
 			if(!playerUtils.isRunEnabled() && !isAcid())
@@ -1109,16 +1111,16 @@ public class VorkathPlayerPlugin extends iScript {
 			}
 
 			if(isVorkathAsleep() && !shouldLoot()
-					&& !player.isMoving() && hasFoodForKill()
+					&& !player.isMoving()
 					&& game.modifiedLevel(Skill.HITPOINTS) >= game.baseLevel(Skill.HITPOINTS) - 20
+					&& hasFoodForKill()
 					&& hasPrayerForKill()
 					&& hasVenomForKill()){
 				return POKE_VORKATH;
 			}
 
-			if((isVorkathAsleep() && !shouldLoot() && !hasFoodForKill())
-					|| game.modifiedLevel(Skill.HITPOINTS) <= 5
-					|| (!hasVenomForKill() && isVorkathAsleep()))
+			if((isVorkathAsleep() && !shouldLoot() && (!hasFoodForKill() || !hasVenomForKill() || !hasPrayerForKill()))
+					|| game.modifiedLevel(Skill.HITPOINTS) <= 5)
 				return TELEPORT_TO_POH;
 		}
 
