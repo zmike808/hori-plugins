@@ -4,7 +4,9 @@ import com.google.inject.Provides;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.*;
+import net.runelite.api.Client;
+import net.runelite.api.GameState;
+import net.runelite.api.TileObject;
 import net.runelite.api.events.*;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
@@ -12,13 +14,15 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.iutils.PrayerUtils;
-import net.runelite.client.plugins.iutils.*;
+import net.runelite.client.plugins.basicapi.utils.BankUtils;
+import net.runelite.client.plugins.basicapi.utils.BankingUtilsTest;
 import net.runelite.client.plugins.iutils.game.Game;
+import net.runelite.client.plugins.iutils.iUtils;
 import org.pf4j.Extension;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Extension
 @PluginDependency(iUtils.class)
@@ -34,26 +38,16 @@ public class BasicApiPlugin extends Plugin {
 	private BasicApiConfig config;
 
 	@Inject
-	private PrayerUtils prayerUtils;
+	private Game game;
 
 	@Inject
 	private Client client;
 
 	@Inject
-	private WalkUtils walkUtils;
+	private BankingUtilsTest bankingUtilsTest;
 
 	@Inject
-	private NPCUtils npcUtils;
-
-	@Inject
-	private CalculationUtils calc;
-
-	@Inject
-	private iUtils utils;
-
-	@Inject
-	private Game game;
-
+	private BankUtils bankUtils;
 
 	public BasicApiPlugin() {
 	}

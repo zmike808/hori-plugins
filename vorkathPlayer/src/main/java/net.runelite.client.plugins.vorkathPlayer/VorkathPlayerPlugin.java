@@ -16,6 +16,7 @@ import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.basicapi.BasicApiPlugin;
 import net.runelite.client.plugins.basicapi.utils.BankUtils;
+import net.runelite.client.plugins.basicapi.utils.BankingUtilsTest;
 import net.runelite.client.plugins.basicapi.utils.Inventory;
 import net.runelite.client.plugins.basicapi.utils.PrayerUtils;
 import net.runelite.client.plugins.iutils.*;
@@ -91,7 +92,7 @@ public class VorkathPlayerPlugin extends iScript {
 	private BasicApiPlugin basicApi;
 
 	@Inject
-	private BankUtils bankUtils;
+	private BankingUtilsTest bankUtils;
 
 	@Inject
 	private Inventory inventory;
