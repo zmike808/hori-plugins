@@ -504,7 +504,6 @@ public class VorkathPlayerPlugin extends iScript {
 						return;
 					}
 
-
 					if(iceMinion != null && player.getInteracting() == null) {
 						attackMinion();
 					}
@@ -659,7 +658,7 @@ public class VorkathPlayerPlugin extends iScript {
 						withdrawUse(new HashMap<Integer, Integer>() {{
 							if(!isItemEquipped(getMainhandId()))
 								put(getMainhandId(), 1);
-							if(getOffhandId() != -1 && !isItemEquipped(getOffhandId()))
+							if(getOffhandId() != 0 && !isItemEquipped(getOffhandId()))
 								put(getOffhandId(), 1);
 						}}, "Wield");
 						timeout=1;
@@ -1097,7 +1096,7 @@ public class VorkathPlayerPlugin extends iScript {
 			if(!config.useStaff() || (config.useStaff() && !isMinion)){
 				if(vorkathAlive != null && !isItemEquipped(getMainhandId()) && inventory.contains(getMainhandId()))
 					return EQUIP_MH;
-				if(vorkathAlive != null && getOffhandId() != -1 && !isItemEquipped(getOffhandId()) && inventory.contains(getOffhandId()))
+				if(vorkathAlive != null && getOffhandId() != 0 && !isItemEquipped(getOffhandId()) && inventory.contains(getOffhandId()))
 					return EQUIP_OH;
 			}
 
@@ -1539,7 +1538,7 @@ public class VorkathPlayerPlugin extends iScript {
 				inventoryItems.put(getMainhandId(), 1);
 			}
 			if(config.useSpec().getHands() == 2){
-				if(getOffhandId() != -1){
+				if(getOffhandId() != 0){
 					inventoryItems.put(getOffhandId(), 1);
 				}
 			}
@@ -1599,7 +1598,7 @@ public class VorkathPlayerPlugin extends iScript {
 
 	public boolean isGeared(){
 		if(getSpecId() != -1 && !isItemEquipped(getSpecId())) return false;
-		if(getSpecId() == -1 && ((getMainhandId() != -1 && !isItemEquipped(getMainhandId())) || (getOffhandId() != -1 && !isItemEquipped(getOffhandId())))) return false;
+		if(getSpecId() == -1 && ((getMainhandId() != -1 && !isItemEquipped(getMainhandId())) || (getOffhandId() != 0 && !isItemEquipped(getOffhandId())))) return false;
 		if(config.useRange() && config.useSwitches() && !playerUtils.isItemEquipped(Set.of(RUBY_SET))) return false;
 
 		return true;
