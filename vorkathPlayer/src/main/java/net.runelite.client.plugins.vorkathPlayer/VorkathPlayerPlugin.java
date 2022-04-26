@@ -671,7 +671,6 @@ public class VorkathPlayerPlugin extends iScript {
 					}
 					break;
 				case OVEREAT:
-
 					if(inventory.isFull()){
 						if(config.debug())
 							game.sendGameMessage("Depositing inventory");
@@ -782,7 +781,7 @@ public class VorkathPlayerPlugin extends iScript {
 					break;
 			}
 		}
-		else{
+		else {
 			if(prayerUtils.isQuickPrayerActive()){
 				prayerUtils.toggleQuickPrayer(false, sleepDelay());
 				return;
@@ -983,7 +982,6 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 
 		if(isAtVorkath()) {
-
 			iNPC vorkathAlive = game.npcs().withId(NpcID.VORKATH_8061).nearest();
 			final WorldPoint baseTile = config.useRange() ? WorldPoint.fromLocal(client, rangeBaseTile) : WorldPoint.fromLocal(client, meleeBaseTile);
 
@@ -1156,9 +1154,10 @@ public class VorkathPlayerPlugin extends iScript {
 			return USE_OBSTACLE;
 		}
 
-		if(!isNearBank() && !isAtVorkath() && !isInPOH() && !shouldUseObstacle() && !shouldUseBoat()){
+		/*if(!isNearBank() && !isAtVorkath() && !isInPOH() && !shouldUseObstacle() && !shouldUseBoat()){
 			return TELEPORT_TO_POH;
 		}
+		 */
 
 		return TIMEOUT;
 	}
