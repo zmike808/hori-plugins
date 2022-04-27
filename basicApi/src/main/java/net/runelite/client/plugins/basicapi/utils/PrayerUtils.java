@@ -58,7 +58,7 @@ public class PrayerUtils {
         }
     }
 
-    public void togglePrayer(boolean invokes, boolean active, Prayer prayer, long timeToDelay){
+    public void togglePrayer(boolean active, Prayer prayer, long timeToDelay){
         Widget widget = client.getWidget(prayer.getWidgetInfo());
 
         if(widget == null || (active && isActive(prayer)) || !active && !isActive(prayer)) return;
@@ -66,7 +66,7 @@ public class PrayerUtils {
         LegacyMenuEntry prayerToggle = new LegacyMenuEntry(active ? "Activate" : "Deactivate", "", 1, MenuAction.CC_OP, -1, widget.getId(), false);
         Rectangle bounds = widget.getBounds();
 
-        if(invokes){
+        if(basicApiPlugin.useInvokes()){
             utils.doInvokeMsTime(prayerToggle, timeToDelay);
         }else{
             utils.doActionMsTime(prayerToggle, bounds, timeToDelay);

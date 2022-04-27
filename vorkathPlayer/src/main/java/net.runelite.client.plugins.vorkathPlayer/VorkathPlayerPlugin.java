@@ -1692,7 +1692,7 @@ public class VorkathPlayerPlugin extends iScript {
 
 
 		for(WidgetItem item : inventory.getAll()){
-			if(!client.getItemComposition(item.getId()).isTradeable() || item == null) continue;
+			if(!client.getItemComposition(item.getId()).isTradeable() || item == null || item.getId() == config.houseTele().getId()) continue;
 
 			if(itemValues.containsKey(item.getId())){
 				if((itemValues.get(item.getId()) * item.getQuantity()) < lootValue){
