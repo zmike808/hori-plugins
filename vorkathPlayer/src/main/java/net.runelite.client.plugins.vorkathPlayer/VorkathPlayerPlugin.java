@@ -687,6 +687,8 @@ public class VorkathPlayerPlugin extends iScript {
 						withdrawUse(new HashMap<Integer, Integer>() {{
 							put(getFoodId(), 1);
 						}},"Eat");
+						timeout+=1;
+						return;
 					}
 					if(!config.usePool() && (game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS) || game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER))) {
 						withdrawUse(new HashMap<Integer, Integer>() {{
