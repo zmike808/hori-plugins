@@ -671,16 +671,16 @@ public class VorkathPlayerPlugin extends iScript {
 					}
 					break;
 				case OVEREAT:
-					if(inventory.isFull()){
+					if(inventory.getFreeSlots() < 8) {
 						if(config.debug())
-							game.sendGameMessage("Depositing inventory");
-
-						if(!bankUtils.isOpen())
-							openBank();
-						else
+							game.sendGameMessage("Free slots is less than 8, depositing inventory");
+						if (bankUtils.isOpen()) {
 							bankUtils.depositAll();
-
-						timeout+=2;
+							timeout += 1;
+						} else {
+							openBank();
+						}
+						return;
 					}
 
 					if(config.overEat() && getFoodId() == ItemID.ANGLERFISH && game.modifiedLevel(Skill.HITPOINTS) <= game.baseLevel(Skill.HITPOINTS)){
