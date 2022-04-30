@@ -272,7 +272,16 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 
 		if(timeout > 0){
+			if(isAcid()){
+				game.sendGameMessage("Acid Phase: Turning off prayer + run");
+				if (playerUtils.isRunEnabled()) {
+					toggleRun(false, 30);
+				}
 
+				if(prayerUtils.isQuickPrayerActive()){
+					prayerUtils.toggleQuickPrayer(false, 70);
+				}
+			}
 			--timeout;
 			return;
 		}
@@ -396,17 +405,8 @@ public class VorkathPlayerPlugin extends iScript {
 					inventory.interactWithItem(RUBY_SET, 0, "Wield");
 					break;
 				case ACID_WALK:
-					if (playerUtils.isRunEnabled()) {
-						toggleRun(false, 10);
-					}
-
-					if(prayerUtils.isQuickPrayerActive() && (getWalkMethod() != 2 || (getWalkMethod() == 2 && player.isMoving()))){
-						prayerUtils.toggleQuickPrayer(false, 70);
-						return;
-					}
-
 					if(config.eatWoox() && shouldEat()){
-						inventory.interactWithItem(getFoodId(), 180, "Eat");
+						inventory.interactWithItem(getFoodId(), calc.getRandomIntBetweenRange(120, 160), "Eat");
 					}
 
 					if(getWalkMethod() == 1) return;
@@ -673,7 +673,7 @@ public class VorkathPlayerPlugin extends iScript {
 						}
 						return;
 					}
-					if(!config.usePool() && (game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS) || game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER))) {
+					if((game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS) || game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER))) {
 						withdrawUse(true, new HashMap<Integer, Integer>() {{
 							if(game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS))
 								put(getFoodId(), 5);
@@ -923,7 +923,7 @@ public class VorkathPlayerPlugin extends iScript {
 			isMinion = false;
 		}
 		if(actor.getAnimation() == 7957 && actor.getName().equalsIgnoreCase("Vorkath")){
-			//timeout+=1;
+			timeout=1;
 		}
 	}
 
