@@ -306,19 +306,19 @@ public class VorkathPlayerPlugin extends iScript {
 					if(!inventory.contains(config.prayer().getIds())){
 						teleToPoH();
 					}
-					inventory.interactWithItem(inventory.getFirst(config.antivenom().getIds()).getId(), 0, "Drink");
+					inventory.interactWithItem(inventory.getFirst(config.antivenom().getIds()).getId(), sleepDelay(), "Drink");
 					timeout+=1;
 					break;
 				case DRINK_ANTIFIRE:
-					inventory.interactWithItem(inventory.getFirst(config.antifire().getIds()).getId(), 0, "Drink");
+					inventory.interactWithItem(inventory.getFirst(config.antifire().getIds()).getId(), sleepDelay(), "Drink");
 					timeout+=1;
 					break;
 				case DRINK_RESTORE:
-					inventory.interactWithItem(inventory.getFirst(config.prayer().getIds()).getId(), 0, "Drink");
+					inventory.interactWithItem(inventory.getFirst(config.prayer().getIds()).getId(), sleepDelay(), "Drink");
 					timeout+=1;
 					break;
 				case DRINK_BOOST:
-					inventory.interactWithItem(inventory.getFirst(config.boostPotion().getIds()).getId(), 0, "Drink");
+					inventory.interactWithItem(inventory.getFirst(config.boostPotion().getIds()).getId(), sleepDelay(), "Drink");
 					timeout+=1;
 					break;
 				case TOGGLE_RUN:
@@ -334,10 +334,10 @@ public class VorkathPlayerPlugin extends iScript {
 
 					break;
 				case EQUIP_MH:
-					inventory.interactWithItem(getMainhandId(), 0, "Wield");
+					inventory.interactWithItem(getMainhandId(), sleepDelay(), "Wield");
 					break;
 				case EQUIP_OH:
-					inventory.interactWithItem(getOffhandId(), 0, "Wield");
+					inventory.interactWithItem(getOffhandId(), sleepDelay(), "Wield");
 					break;
 				case EQUIP_SPEC:
 					if(config.useSpec().getHands() == 2 && inventory.getFreeSlots() < 1){
@@ -349,7 +349,7 @@ public class VorkathPlayerPlugin extends iScript {
 							return;
 						}
 					}
-					inventory.interactWithItem(getSpecId(), 0, "Wield");
+					inventory.interactWithItem(getSpecId(), sleepDelay(), "Wield");
 					break;
 				case EQUIP_STAFF:
 					inventory.interactWithItem(getStaffId(), 0, "Wield");
@@ -368,7 +368,8 @@ public class VorkathPlayerPlugin extends iScript {
 						if(config.eatLoot() && hasFoodForKill()){
 							if(config.debug())
 								game.sendGameMessage("Eating food for loot...");
-							inventory.interactWithItem(getFoodId(), 0, "Eat");
+
+							inventory.interactWithItem(getFoodId(), sleepDelay(), "Eat");
 							timeout+=1;
 							return;
 						}
@@ -395,11 +396,12 @@ public class VorkathPlayerPlugin extends iScript {
 					inventory.interactWithItem(RUBY_SET, 0, "Wield");
 					break;
 				case ACID_WALK:
-					if(prayerUtils.isQuickPrayerActive() && (getWalkMethod() != 2 || (getWalkMethod() == 2 && player.isMoving())))
-						prayerUtils.toggleQuickPrayer(false, 100);
-
 					if (playerUtils.isRunEnabled()) {
-						toggleRun(false, 270);
+						toggleRun(false, 10);
+					}
+
+					if(prayerUtils.isQuickPrayerActive() && (getWalkMethod() != 2 || (getWalkMethod() == 2 && player.isMoving()))){
+						prayerUtils.toggleQuickPrayer(false, 70);
 						return;
 					}
 
