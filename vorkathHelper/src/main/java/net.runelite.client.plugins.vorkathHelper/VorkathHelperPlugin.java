@@ -112,6 +112,7 @@ public class VorkathHelperPlugin extends iScript {
 	protected void shutDown() {
 		startPlugin = false;
 		log.info("Vorkath Helper shutDown");
+		stop();
 	}
 
 	@Override
