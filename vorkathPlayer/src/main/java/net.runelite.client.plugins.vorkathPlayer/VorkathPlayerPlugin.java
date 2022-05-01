@@ -150,6 +150,10 @@ public class VorkathPlayerPlugin extends iScript {
 		return config.food().getId();
 	}
 
+	private int getMinDoses(){
+		return config.minDoses();
+	}
+
 	private int getWalkMethod(){
 		return config.walkMethod().getId();
 	}
@@ -1437,7 +1441,7 @@ public class VorkathPlayerPlugin extends iScript {
 	}
 
 	private boolean hasPrayerForKill(){
-		return inventory.contains(config.prayer().getIds()) || prayerUtils.getRemainingPoints() > 65;
+		return getPotionDoses(config.prayer().getDose4()) >= getMinDoses();
 	}
 
 	private boolean hasVenomForKill(){
@@ -1700,6 +1704,16 @@ public class VorkathPlayerPlugin extends iScript {
 				return;
 			}
 		}
+	}
+
+	public int getPotionDoses(int id) {
+		String partial = client.getItemComposition(id).getName().substring(0, 7);
+		int count = 0;
+		for(WidgetItem item : inventory.getAll(a -> client.getItemComposition(a.getId()).getName().contains(partial))){
+			String name = client.getItemComposition(item.getId()).getName();
+			count += Integer.parseInt(name.substring(name.indexOf("(") + 1, name.indexOf(")")));
+		}
+		return count;
 	}
 
 }

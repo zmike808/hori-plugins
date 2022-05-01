@@ -200,27 +200,31 @@ public interface VorkathPlayerConfig extends Config {
         return 39;
     }
 
-    @ConfigItem(keyName = "eatWoox", name = "Eat while 1 tick walking", description = "Will override the eat function to allow eating while 1 tick walking.<br>Best used in combination with invokes", position = 29, section = consumablesSection)
+    @ConfigItem(keyName = "eatWoox", name = "Eat while 1 tick walking", description = "Will override the eat function to allow eating while 1 tick walking.<br>Best used in combination with invokes", position = 28, section = consumablesSection)
     default boolean eatWoox() {
         return false;
     }
 
-    @ConfigItem(keyName = "prayerID", name = "Prayer restore", description = "Type of prayer point restore potion", position = 30, section = consumablesSection)
+    @ConfigItem(keyName = "prayerID", name = "Prayer restore", description = "Type of prayer point restore potion", position = 29, section = consumablesSection)
     default Prayer prayer() {
         return Prayer.PRAYER_POTION;
     }
 
     @Range(min = 1, max = 8)
-    @ConfigItem(keyName = "prayerAmount", name = "Prayer pots", description = "Quantity of prayer point restores to bring", position = 31, section = consumablesSection)
+    @ConfigItem(keyName = "prayerAmount", name = "Prayer pots", description = "Quantity of prayer point restores to bring", position = 30, section = consumablesSection)
     default int prayerAmount() {
         return 4;
     }
 
     @Range(min = 1, max = 99)
-    @ConfigItem(keyName = "restoreAt", name = "Drink prayer at", description = "Drink prayer point restores when under this amount of prayer", position = 32, section = consumablesSection)
+    @ConfigItem(keyName = "restoreAt", name = "Drink prayer at", description = "Drink prayer point restores when under this amount of prayer", position = 31, section = consumablesSection)
     default int restoreAt() {
         return 15;
     }
+
+    @Range(min = 0, max = 10)
+    @ConfigItem(keyName = "minDoses", name = "Minimum doses", description = "Minimum doses to start a new kill", position = 32, section = consumablesSection)
+    default int minDoses() { return 2; }
 
     @ConfigItem(keyName = "antifireID", name = "Antifire", description = "The name of your Antifire potion", position = 33, section = consumablesSection)
     default Antifire antifire() {
