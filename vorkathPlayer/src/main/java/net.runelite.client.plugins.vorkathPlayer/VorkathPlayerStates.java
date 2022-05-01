@@ -39,5 +39,6 @@ public enum VorkathPlayerStates {
     LOW_BOLTS,
     USE_ALTAR,
     SPELLBOOK_STOP,
-    TIMEOUT;
+    TIMEOUT,
+    HANDLE_BREAK;
 }

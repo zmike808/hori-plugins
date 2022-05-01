@@ -22,6 +22,7 @@ import net.runelite.client.plugins.iutils.api.SpellBook;
 import net.runelite.client.plugins.iutils.game.Game;
 import net.runelite.client.plugins.iutils.game.iNPC;
 import net.runelite.client.plugins.iutils.game.iObject;
+import net.runelite.client.plugins.iutils.scripts.ReflectBreakHandler;
 import net.runelite.client.plugins.iutils.scripts.iScript;
 import net.runelite.client.plugins.iutils.ui.Chatbox;
 import org.pf4j.Extension;
@@ -77,9 +78,6 @@ public class VorkathPlayerPlugin extends iScript {
 	private Game game;
 
 	@Inject
-	private SpellBook spellBook;
-
-	@Inject
 	private CalculationUtils calc;
 
 	@Inject
@@ -93,6 +91,9 @@ public class VorkathPlayerPlugin extends iScript {
 
 	@Inject
 	private Inventory inventory;
+
+	@Inject
+	private ReflectBreakHandler chinBreakHandler;
 
 	private LegacyMenuEntry targetMenu;
 
@@ -178,7 +179,6 @@ public class VorkathPlayerPlugin extends iScript {
 		rechargeHelm = false;
 		gotPet = false;
 		timeout = 0;
-
 	}
 
 	@Provides
@@ -189,16 +189,18 @@ public class VorkathPlayerPlugin extends iScript {
 	@Override
 	protected void startUp() {
 		log.info("Vorkath Player Started");
+		chinBreakHandler.registerPlugin(this);
 	}
 
 	@Override
 	protected void shutDown() {
 		log.info("Vorkath Player Stopped");
+		chinBreakHandler.unregisterPlugin(this);
 	}
 
 	@Override
 	protected void onStart() {
-
+		chinBreakHandler.startPlugin(this);
 	}
 
 	@Override
@@ -218,7 +220,7 @@ public class VorkathPlayerPlugin extends iScript {
 		hasSpecced = false;
 		rechargeHelm = false;
 		gotPet = false;
-		shutDown();
+		chinBreakHandler.stopPlugin(this);
 	}
 
 	@Override
@@ -227,15 +229,10 @@ public class VorkathPlayerPlugin extends iScript {
 	}
 
 	@Subscribe
-	public void onGameStateChanged(GameStateChanged event){
-		if(event.getGameState() == GameState.LOGIN_SCREEN){
-			stop();
-		}
-	}
-
-	@Subscribe
 	public void onGameTick(GameTick event){
-		if(client.getLocalPlayer() == null || client.getGameState() != GameState.LOGGED_IN || !startPlugin) return;
+		//if(client.getLocalPlayer() == null || client.getGameState() != GameState.LOGGED_IN || !startPlugin) return;
+		if(!startPlugin || chinBreakHandler.isBreakActive(this))
+			return;
 
 		final Player player = client.getLocalPlayer();
 		final LocalPoint playerLocal = player.getLocalLocation();
@@ -294,6 +291,9 @@ public class VorkathPlayerPlugin extends iScript {
 
 		//IMPORTANT CHECKS MOVED OUTSIDE OTHER LOGIC
 		switch (getState()){
+			case HANDLE_BREAK:
+				chinBreakHandler.startBreak(this);
+				break;
 			case LOW_RUNES:
 				game.sendGameMessage("PROBLEM: Incorrect / low runes. Please use Law/Chaos/Dust and have more than 100 of each.");
 				stop();
@@ -305,9 +305,7 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 
 		if(isAtVorkath()){
-
 			createSafetiles();
-
 			switch (getState()){
 				case EAT_FOOD:
 					inventory.interactWithItem(getFoodId(), 0, "Eat");
@@ -984,6 +982,10 @@ public class VorkathPlayerPlugin extends iScript {
 
 		if(hasLowRunes()){
 			return LOW_RUNES;
+		}
+
+		if(!isAtVorkath() && chinBreakHandler.shouldBreak(this)){
+			return HANDLE_BREAK;
 		}
 
 		if(isAtVorkath()) {

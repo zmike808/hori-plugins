@@ -112,13 +112,10 @@ public class VorkathHelperPlugin extends iScript {
 	protected void shutDown() {
 		startPlugin = false;
 		log.info("Vorkath Helper shutDown");
-		stop();
 	}
 
 	@Override
 	protected void onStart() {
-		game.sendGameMessage("Vorkath Helper started");
-		startPlugin = true;
 		safeMeleeTiles.clear();
 		dodgeFirebomb = false;
 		timeout = 0;
@@ -126,8 +123,6 @@ public class VorkathHelperPlugin extends iScript {
 
 	@Override
 	protected void onStop() {
-		game.sendGameMessage("Vorkath Helper stopped");
-		startPlugin = false;
 		isAcid = false;
 		dodgeFirebomb = false;
 		isMinion = false;
@@ -647,8 +642,12 @@ public class VorkathHelperPlugin extends iScript {
 
 		if (configButtonClicked.getKey().equalsIgnoreCase("startHelper")) {
 			if (!startPlugin) {
+				game.sendGameMessage("Vorkath started");
+				startPlugin = true;
 				start();
 			} else {
+				game.sendGameMessage("Vorkath stopped");
+				startPlugin = false;
 				stop();
 			}
 		}
