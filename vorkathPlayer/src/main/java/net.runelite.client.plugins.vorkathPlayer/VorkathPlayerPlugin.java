@@ -818,7 +818,7 @@ public class VorkathPlayerPlugin extends iScript {
 				bankUtils.close();
 				return;
 			}
-			if(inventory.contains(a -> client.getItemComposition(a.getId()).getName().contains("Prayer")) && client.getBoostedSkillLevel(Skill.PRAYER) < client.getRealSkillLevel(Skill.PRAYER)){
+			if(consumeableOverride && inventory.contains(a -> client.getItemComposition(a.getId()).getName().contains("Prayer")) && client.getBoostedSkillLevel(Skill.PRAYER) < client.getRealSkillLevel(Skill.PRAYER)){
 				inventory.interactWithItem(inventory.getFirst(a -> client.getItemComposition(a.getId()).getName().contains("Prayer")).getId(), sleepDelay(), actions);
 				return;
 			}
@@ -843,10 +843,12 @@ public class VorkathPlayerPlugin extends iScript {
 					boolean value = amount == -1 ? bankUtils.contains(id) : bankUtils.contains(id, amount);
 
 					if(value){
-						if(amount == -1)
+						if(amount == -1) {
 							bankUtils.withdrawAllItem(id);
-						else
+						}else {
 							bankUtils.withdrawItemAmount(id, amount);
+							timeout += 1;
+						}
 					}else{
 						game.sendGameMessage("Failed to find item: " + client.getItemComposition(id).getName());
 						stop();
