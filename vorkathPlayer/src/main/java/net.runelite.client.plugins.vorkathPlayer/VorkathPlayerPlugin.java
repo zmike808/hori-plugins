@@ -277,13 +277,12 @@ public class VorkathPlayerPlugin extends iScript {
 
 		if(timeout > 0){
 			if(isAcid()){
-				game.sendGameMessage("Acid Phase: Turning off prayer + run");
 				if (playerUtils.isRunEnabled()) {
-					toggleRun(false, 30);
+					toggleRun(false, calc.getRandomIntBetweenRange(0, 30));
 				}
 
 				if(prayerUtils.isQuickPrayerActive()){
-					prayerUtils.toggleQuickPrayer(false, 70);
+					prayerUtils.toggleQuickPrayer(false, calc.getRandomIntBetweenRange(100,150));
 				}
 			}
 			--timeout;
@@ -371,7 +370,7 @@ public class VorkathPlayerPlugin extends iScript {
 					toggleSpec();
 					break;
 				case POKE_VORKATH:
-					actionNPC(vorkathAsleep.id(), MenuAction.NPC_FIRST_OPTION, false);
+					actionNPC(vorkathAsleep.id(), MenuAction.NPC_FIRST_OPTION, sleepDelay());
 					break;
 				case LOOT_VORKATH:
 					if(inventory.isFull()){
@@ -468,7 +467,7 @@ public class VorkathPlayerPlugin extends iScript {
 
 						if(safeWooxTile != null){
 							if(player.getWorldLocation().equals(safeWooxTile)){
-								actionNPC(vorkathAlive.id(), MenuAction.NPC_SECOND_OPTION, true);
+								actionNPC(vorkathAlive.id(), MenuAction.NPC_SECOND_OPTION, calc.getRandomIntBetweenRange(0, 40));
 							}else{
 								LocalPoint lp = LocalPoint.fromWorld(client, safeWooxTile);
 								if(lp != null){
@@ -527,7 +526,7 @@ public class VorkathPlayerPlugin extends iScript {
 					break;
 				case RETALIATE:
 					if(vorkathAlive != null){
-						actionNPC(vorkathAlive.id(), MenuAction.NPC_SECOND_OPTION, false);
+						actionNPC(vorkathAlive.id(), MenuAction.NPC_SECOND_OPTION, sleepDelay());
 					}
 					break;
 				case TELEPORT_TO_POH:
@@ -1441,7 +1440,7 @@ public class VorkathPlayerPlugin extends iScript {
 	}
 
 	private boolean hasPrayerForKill(){
-		return getPotionDoses(config.prayer().getDose4()) >= getMinDoses();
+		return getPotionDoses(config.prayer().getDose4()) >= getMinDoses() || game.modifiedLevel(Skill.PRAYER) > 70;
 	}
 
 	private boolean hasVenomForKill(){
@@ -1479,14 +1478,14 @@ public class VorkathPlayerPlugin extends iScript {
 			utils.doActionMsTime(targetMenu, runOrb.getCanvasLocation(), override ? 0 : value);
 	}
 
-	private void actionNPC(int id, MenuAction action, boolean override) {
+	private void actionNPC(int id, MenuAction action, long delay) {
 		NPC target = npcUtils.findNearestNpc(id);
 		if (target != null) {
 			targetMenu = new LegacyMenuEntry("", "", target.getIndex(), action, target.getIndex(), 0, false);
 			if (basicApi.useInvokes())
-				utils.doInvokeMsTime(targetMenu, override ? calc.getRandomIntBetweenRange(0, 45) : sleepDelay());
+				utils.doInvokeMsTime(targetMenu, delay);
 			else
-				utils.doNpcActionMsTime(target, action.getId(), override ? calc.getRandomIntBetweenRange(0, 45) : sleepDelay());
+				utils.doNpcActionMsTime(target, action.getId(), delay);
 		}
 		return;
 	}
