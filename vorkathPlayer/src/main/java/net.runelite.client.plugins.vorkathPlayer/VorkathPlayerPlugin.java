@@ -1211,7 +1211,7 @@ public class VorkathPlayerPlugin extends iScript {
 		if(config.boostPotion().getDose4() == -1) return false;
 
 		Skill skill = config.boostPotion().getSkill();
-		return game.modifiedLevel(skill) <= config.boostLevel();
+		return game.modifiedLevel(skill) <= (game.baseLevel(skill) + config.boostLevel());
 	}
 
 	public boolean shouldDrinkVenom() {
