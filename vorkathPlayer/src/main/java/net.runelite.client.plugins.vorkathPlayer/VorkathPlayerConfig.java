@@ -200,11 +200,6 @@ public interface VorkathPlayerConfig extends Config {
         return 39;
     }
 
-    @ConfigItem(keyName = "overEat", name = "Use resources at bank", description = "Will over eat at the bank if using Anglerfish<br>Will also restore prayer points and health if not using a POH pool", position = 28, section = consumablesSection)
-    default boolean overEat() {
-        return false;
-    }
-
     @ConfigItem(keyName = "eatWoox", name = "Eat while 1 tick walking", description = "Will override the eat function to allow eating while 1 tick walking.<br>Best used in combination with invokes", position = 29, section = consumablesSection)
     default boolean eatWoox() {
         return false;

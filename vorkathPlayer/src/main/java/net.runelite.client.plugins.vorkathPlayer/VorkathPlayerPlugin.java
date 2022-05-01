@@ -367,7 +367,7 @@ public class VorkathPlayerPlugin extends iScript {
 					toggleSpec();
 					break;
 				case POKE_VORKATH:
-					actionNPC(vorkathAsleep.id(), MenuAction.NPC_FIRST_OPTION);
+					actionNPC(vorkathAsleep.id(), MenuAction.NPC_FIRST_OPTION, false);
 					break;
 				case LOOT_VORKATH:
 					if(inventory.isFull()){
@@ -464,7 +464,7 @@ public class VorkathPlayerPlugin extends iScript {
 
 						if(safeWooxTile != null){
 							if(player.getWorldLocation().equals(safeWooxTile)){
-								actionNPC(vorkathAlive.id(), MenuAction.NPC_SECOND_OPTION);
+								actionNPC(vorkathAlive.id(), MenuAction.NPC_SECOND_OPTION, true);
 							}else{
 								LocalPoint lp = LocalPoint.fromWorld(client, safeWooxTile);
 								if(lp != null){
@@ -523,7 +523,7 @@ public class VorkathPlayerPlugin extends iScript {
 					break;
 				case RETALIATE:
 					if(vorkathAlive != null){
-						actionNPC(vorkathAlive.id(), MenuAction.NPC_SECOND_OPTION);
+						actionNPC(vorkathAlive.id(), MenuAction.NPC_SECOND_OPTION, false);
 					}
 					break;
 				case TELEPORT_TO_POH:
@@ -676,7 +676,7 @@ public class VorkathPlayerPlugin extends iScript {
 					if((game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS) || game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER))) {
 						withdrawUse(true, new HashMap<Integer, Integer>() {{
 							if(game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS))
-								put(getFoodId(), 5);
+								put(getFoodId(), 3);
 							if(game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER))
 								put(config.prayer().getDose4(), 1);
 						}},"Eat", "Drink");
@@ -684,7 +684,7 @@ public class VorkathPlayerPlugin extends iScript {
 						return;
 					}
 
-					if(config.overEat() && getFoodId() == ItemID.ANGLERFISH && game.modifiedLevel(Skill.HITPOINTS) <= game.baseLevel(Skill.HITPOINTS)){
+					if(getFoodId() == ItemID.ANGLERFISH && game.modifiedLevel(Skill.HITPOINTS) <= game.baseLevel(Skill.HITPOINTS)){
 						withdrawUse(false, new HashMap<Integer, Integer>() {{
 							put(getFoodId(), 1);
 						}},"Eat");
@@ -1017,7 +1017,7 @@ public class VorkathPlayerPlugin extends iScript {
 			}
 
 			if(shouldEat()){
-				if((inventory.getFirst(config.food().getId()) == null && game.modifiedLevel(Skill.HITPOINTS) <= config.eatAt()) && (vorkathAlive != null && !vorkathAlive.isDead()))
+				if((inventory.getFirst(config.food().getId()) == null && game.modifiedLevel(Skill.HITPOINTS) <= config.eatAt()) && (vorkathAlive != null && !vorkathAlive.isDead() && calculateHealth(vorkathAlive) > 30))
 					return TELEPORT_TO_POH;
 				if(inventory.contains(getFoodId()))
 					return EAT_FOOD;
@@ -1272,7 +1272,7 @@ public class VorkathPlayerPlugin extends iScript {
 			}
 			return filtered.get(0);
 		}else{
-			if(!items.isEmpty() && (!hasFoodForKill() || !hasVenomForKill() || !hasPrayerForKill())){
+			if(!items.isEmpty() && !inventory.isFull() && (!hasFoodForKill() || !hasVenomForKill() || !hasPrayerForKill())){
 				TileItem nextItem = items.iterator().next();
 				if(!itemValues.containsKey(nextItem.getId()))
 					itemValues.put(nextItem.getId(), utils.getItemPrice(nextItem.getId(), true));
@@ -1474,14 +1474,14 @@ public class VorkathPlayerPlugin extends iScript {
 			utils.doActionMsTime(targetMenu, runOrb.getCanvasLocation(), override ? 0 : value);
 	}
 
-	private void actionNPC(int id, MenuAction action) {
+	private void actionNPC(int id, MenuAction action, boolean override) {
 		NPC target = npcUtils.findNearestNpc(id);
 		if (target != null) {
 			targetMenu = new LegacyMenuEntry("", "", target.getIndex(), action, target.getIndex(), 0, false);
 			if (basicApi.useInvokes())
-				utils.doInvokeMsTime(targetMenu, sleepDelay());
+				utils.doInvokeMsTime(targetMenu, override ? calc.getRandomIntBetweenRange(0, 45) : sleepDelay());
 			else
-				utils.doNpcActionMsTime(target, action.getId(), sleepDelay());
+				utils.doNpcActionMsTime(target, action.getId(), override ? calc.getRandomIntBetweenRange(0, 45) : sleepDelay());
 		}
 		return;
 	}
@@ -1608,7 +1608,7 @@ public class VorkathPlayerPlugin extends iScript {
 	}
 
 	public boolean shouldEatAtBank(){
-		return (game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER)) || (game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS)) || (config.overEat() && getFoodId() == ItemID.ANGLERFISH && game.modifiedLevel(Skill.HITPOINTS) <= game.baseLevel(Skill.HITPOINTS));
+		return (game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER)) || (game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS)) || (getFoodId() == ItemID.ANGLERFISH && game.modifiedLevel(Skill.HITPOINTS) <= game.baseLevel(Skill.HITPOINTS));
 	}
 
 	private void continueChat() {
