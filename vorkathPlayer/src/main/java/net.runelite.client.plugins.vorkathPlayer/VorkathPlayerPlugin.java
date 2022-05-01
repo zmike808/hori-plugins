@@ -223,6 +223,14 @@ public class VorkathPlayerPlugin extends iScript {
 		chinBreakHandler.stopPlugin(this);
 	}
 
+	@Subscribe
+	public void onGameStateChanged(GameStateChanged gameStateChanged)
+	{
+		if(gameStateChanged.getGameState() == GameState.LOGIN_SCREEN && hasDied){
+			stop();
+		}
+	}
+
 	@Override
 	protected void loop() {
 		game.tick();
