@@ -804,8 +804,7 @@ public class VorkathPlayerPlugin extends iScript {
 
 		Collection<Integer> temp1 = new ArrayList<>(temp);
 
-		if(inventory.containsAllOf(temp)
-				|| (consumeableOverride && (!bankUtils.isOpen() || inventory.contains(getFoodId())) && inventory.contains(a -> client.getItemComposition(a.getId()).getName().contains("Prayer potion")))){
+		if(inventory.containsAllOf(temp) || (consumeableOverride && (game.modifiedLevel(Skill.HITPOINTS) >= game.baseLevel(Skill.HITPOINTS) || inventory.contains(getFoodId())) && (game.modifiedLevel(Skill.PRAYER) >= game.baseLevel(Skill.PRAYER) || inventory.contains(a -> client.getItemComposition(a.getId()).getName().contains("Prayer potion"))))){
 			if(bankUtils.isOpen()){
 				bankUtils.close();
 				return;
@@ -843,6 +842,8 @@ public class VorkathPlayerPlugin extends iScript {
 						game.sendGameMessage("Failed to find item: " + client.getItemComposition(id).getName());
 						stop();
 					}
+				}else{
+					continue;
 				}
 				return;
 			}
