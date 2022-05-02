@@ -4,8 +4,10 @@ import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
+import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
+import net.runelite.api.queries.GameObjectQuery;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.api.widgets.WidgetItem;
@@ -21,7 +23,6 @@ import net.runelite.client.plugins.iutils.*;
 import net.runelite.client.plugins.iutils.api.SpellBook;
 import net.runelite.client.plugins.iutils.game.Game;
 import net.runelite.client.plugins.iutils.game.iNPC;
-import net.runelite.client.plugins.iutils.game.iObject;
 import net.runelite.client.plugins.iutils.scripts.ReflectBreakHandler;
 import net.runelite.client.plugins.iutils.scripts.iScript;
 import net.runelite.client.plugins.iutils.ui.Chatbox;
@@ -121,6 +122,7 @@ public class VorkathPlayerPlugin extends iScript {
 	public WorldPoint safeWooxTile;
 	private LocalPoint meleeBaseTile;
 	private LocalPoint rangeBaseTile;
+	public WorldArea fremmyArea;
 	public List<TileItem> items;
 	public boolean hasDied;
 	public Collection<Integer> serpItems;
@@ -163,6 +165,7 @@ public class VorkathPlayerPlugin extends iScript {
 		regions = Arrays.asList(7513, 7514, 7769, 7770, 8025, 8026);
 		meleeBaseTile = new LocalPoint(6208, 7744);
 		rangeBaseTile = new LocalPoint(6208, 7104);
+		fremmyArea = new WorldArea(new WorldPoint(2613, 3620, 0), new WorldPoint(2693, 3716, 0));
 		serpItems = Set.of(ItemID.ZULRAHS_SCALES, ItemID.SERPENTINE_HELM_UNCHARGED, ItemID.SERPENTINE_HELM);
 		acidSpots = new ArrayList<>();
 		acidFreePath = new ArrayList<>();
@@ -226,6 +229,9 @@ public class VorkathPlayerPlugin extends iScript {
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
+		if(gameStateChanged.getGameState() == GameState.LOADING)
+			timeout+=3;
+
 		if(gameStateChanged.getGameState() == GameState.LOGIN_SCREEN && hasDied){
 			stop();
 		}
@@ -278,6 +284,7 @@ public class VorkathPlayerPlugin extends iScript {
 			}else{
 				basicApi.logout();
 			}
+			return;
 		}
 
 		if(timeout > 0){
@@ -408,10 +415,10 @@ public class VorkathPlayerPlugin extends iScript {
 					walkUtils.sceneWalk(baseTile, 0, sleepDelay());
 					break;
 				case SWITCH_DIAMOND:
-					inventory.interactWithItem(DIAMOND_SET, 0, "Wield");
+					inventory.interactWithItem(DIAMOND_SET, sleepDelay(), "Wield");
 					break;
 				case SWITCH_RUBY:
-					inventory.interactWithItem(RUBY_SET, 0, "Wield");
+					inventory.interactWithItem(RUBY_SET, sleepDelay(), "Wield");
 					break;
 				case ACID_WALK:
 					if(config.eatWoox() && shouldEat()){
@@ -551,31 +558,27 @@ public class VorkathPlayerPlugin extends iScript {
 					toggleRun(false, sleepDelay());
 					break;
 				case USE_ALTAR:
-					iObject altarObject = game.objects().filter(a -> {
-						return a.name().contains("Altar") && a.actions().contains("Pray");
-					}).nearest();
+					GameObject altar = new GameObjectQuery().filter(a -> a.getName().contains("Altar") && Arrays.stream(a.getActions()).anyMatch(b -> b.contains("Pray"))).result(client).first();
 
-					if(altarObject != null && !player.isMoving())
-						actionObject(altarObject.id(), MenuAction.GAME_OBJECT_FIRST_OPTION, null);
+					if(altar != null && !player.isMoving())
+						actionObject(altar.getId(), MenuAction.GAME_OBJECT_FIRST_OPTION, null);
 
 					break;
 				case USE_POOL:
-					iObject poolObject = game.objects().filter(a -> {
-						return a.name().contains("pool") && a.actions().contains("Drink");
-					}).nearest();
+					GameObject pool = new GameObjectQuery().filter(a -> a.getName().contains("pool") && Arrays.stream(a.getActions()).anyMatch(b -> b != null && b.contains("Drink"))).result(client).first();
 
-					if(poolObject != null && !player.isMoving())
-						actionObject(poolObject.id(), MenuAction.GAME_OBJECT_FIRST_OPTION, null);
+					if(pool != null && !player.isMoving())
+						actionObject(pool.getId(), MenuAction.GAME_OBJECT_FIRST_OPTION, null);
 
 					timeout+=1;
 					break;
 				case USE_PORTAL:
-					iObject portalObject = game.objects().filter(a -> {
-						return a.actions().contains("Lunar Isle") || (a.name().contains("Lunar Isle") && a.actions().contains("Enter"));
-					}).nearest();
+					GameObject portal = new GameObjectQuery().filter(a -> {
+						return Arrays.stream(a.getActions()).anyMatch(b -> b != null && b.equalsIgnoreCase("Lunar Isle")) || (a.getName().contains("Lunar Isle") && Arrays.stream(a.getActions()).anyMatch(c -> c != null && c.contains("Enter")));
+					}).result(client).first();
 
-					if(portalObject != null && !player.isMoving())
-						actionObject(portalObject.id(), MenuAction.GAME_OBJECT_FIRST_OPTION, null);
+					if(portal != null && !player.isMoving())
+						actionObject(portal.getId(), MenuAction.GAME_OBJECT_FIRST_OPTION, null);
 
 					timeout+=1;
 					break;
@@ -685,7 +688,7 @@ public class VorkathPlayerPlugin extends iScript {
 					if((game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS) || game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER))) {
 						withdrawUse(true, new HashMap<Integer, Integer>() {{
 							if(game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS))
-								put(getFoodId(), 3);
+								put(getFoodId(), 4);
 							if(game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER))
 								put(config.prayer().getDose4(), 1);
 						}},"Eat", "Drink");
@@ -767,7 +770,7 @@ public class VorkathPlayerPlugin extends iScript {
 							break;
 						case 1:
 							inventory.interactWithItem(ItemID.FREMENNIK_SEA_BOOTS_4, sleepDelay(), "Teleport");
-							timeout+=7;
+							timeout+=9;
 							break;
 						case 29712:
 							GameObject returnOrb = objectUtils.findNearestGameObject(29712);
@@ -778,7 +781,7 @@ public class VorkathPlayerPlugin extends iScript {
 								}
 							}else{
 								continueChat();
-								timeout+=14;
+								timeout+=16;
 							}
 					}
 					break;
@@ -795,7 +798,12 @@ public class VorkathPlayerPlugin extends iScript {
 					teleToPoH();
 					break;
 				case USE_BOAT:
-					actionObject(29917, MenuAction.GAME_OBJECT_FIRST_OPTION, null);
+					GameObject boat = new GameObjectQuery().idEquals(29917).result(client).first();
+					if(boat != null){
+						actionObject(boat.getId(), MenuAction.GAME_OBJECT_FIRST_OPTION, null);
+					}else if(!player.isMoving()){
+						walkUtils.sceneWalk(new WorldPoint(2641, 3686, 0), 2, sleepDelay());
+					}
 					break;
 				case USE_OBSTACLE:
 					actionObject(31990, MenuAction.GAME_OBJECT_FIRST_OPTION, null);
@@ -1033,7 +1041,7 @@ public class VorkathPlayerPlugin extends iScript {
 			}
 
 			if(shouldEat()){
-				if((inventory.getFirst(config.food().getId()) == null && game.modifiedLevel(Skill.HITPOINTS) <= config.eatAt()) && (vorkathAlive != null && !vorkathAlive.isDead() && calculateHealth(vorkathAlive) > 30))
+				if((inventory.getFirst(config.food().getId()) == null && game.modifiedLevel(Skill.HITPOINTS) <= config.eatAt()) && (vorkathAlive != null && !vorkathAlive.isDead() && calculateHealth(vorkathAlive) > 10))
 					return TELEPORT_TO_POH;
 				if(inventory.contains(getFoodId()))
 					return EAT_FOOD;
@@ -1521,9 +1529,9 @@ public class VorkathPlayerPlugin extends iScript {
 			game.sendGameMessage("Fatal error: Spell is null");
 		}
 
-		if(iceMinion != null && !iceMinion.isDead()) {
-			LegacyMenuEntry entry = new LegacyMenuEntry("Cast", "", iceMinion.getIndex(), MenuAction.WIDGET_TARGET_ON_NPC.getId(), 0, 0, false);
-			utils.oneClickCastSpell(WidgetInfo.SPELL_CRUMBLE_UNDEAD, entry, iceMinion.getConvexHull().getBounds(), sleepLength);
+		if(iceMinion != null) {
+			LegacyMenuEntry entry = new LegacyMenuEntry("", "", iceMinion.getIndex(), MenuAction.WIDGET_TARGET_ON_NPC.getId(), 0, 0, false);
+			utils.oneClickCastSpell(WidgetInfo.SPELL_CRUMBLE_UNDEAD, entry, iceMinion.getConvexHull().getBounds(), sleepDelay());
 		}
 		return;
 	}
@@ -1676,13 +1684,16 @@ public class VorkathPlayerPlugin extends iScript {
 
 	public boolean shouldUseBoat(){
 		GameObject bigBoat = objectUtils.findNearestGameObject(4391);
-		return bigBoat != null;
+		return client.getLocalPlayer() != null && fremmyArea.contains(client.getLocalPlayer().getWorldLocation());
 	}
 
 	public void prioritizeLoot(){
 		WidgetItem itemToDrop = itemToDrop(getLoot());
-
 		if(itemToDrop != null){
+			String name = client.getItemComposition(itemToDrop.getId()).getName();
+			if((name.contains("(1)") && !name.contains("Prayer")) || (!config.usePool() && !config.useAltar() && name.contains("Prayer"))){
+				inventory.interactWithItem(itemToDrop.getId(), sleepDelay(), "Drink");
+			}
 			if(itemToDrop.getId() == getFoodId()){
 				inventory.interactWithItem(itemToDrop.getId(), sleepDelay(), "Eat");
 				return;
