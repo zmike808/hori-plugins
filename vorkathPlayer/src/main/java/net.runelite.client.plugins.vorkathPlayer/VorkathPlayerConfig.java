@@ -47,7 +47,7 @@ public interface VorkathPlayerConfig extends Config {
 
     @Range(
             min = 0,
-            max = 550
+            max = 160
     )
     @ConfigItem(
             keyName = "sleepMin",
@@ -62,7 +62,7 @@ public interface VorkathPlayerConfig extends Config {
 
     @Range(
             min = 0,
-            max = 550
+            max = 160
     )
     @ConfigItem(
             keyName = "sleepMax",
@@ -77,7 +77,7 @@ public interface VorkathPlayerConfig extends Config {
 
     @Range(
             min = 0,
-            max = 550
+            max = 160
     )
     @ConfigItem(
             keyName = "sleepTarget",
@@ -92,7 +92,7 @@ public interface VorkathPlayerConfig extends Config {
 
     @Range(
             min = 0,
-            max = 550
+            max = 160
     )
     @ConfigItem(
             keyName = "sleepDeviation",
@@ -241,7 +241,7 @@ public interface VorkathPlayerConfig extends Config {
         return BoostPotion.DIVINE_SUPER_COMBAT;
     }
 
-    @ConfigItem(keyName = "boostLevel", name = "Boost offset", description = "Level to boost at <= base level + offset", position = 36, section = consumablesSection)
+    @ConfigItem(keyName = "boostLevel", name = "Boost offset", description = "Will drink when the boost amount is less than this value<br>If you want to drink at or below 105 range and you have 99<br>This value should be 6", position = 36, section = consumablesSection)
     default int boostLevel() {
         return 1;
     }
@@ -286,7 +286,7 @@ public interface VorkathPlayerConfig extends Config {
         return true;
     }
 
-    @ConfigItem(keyName = "lootBonesIfRoom", name = "Loot Superior dragon bones only if you have room.", description = "", hidden = true, unhide = "lootBones", position = 52, section = lootSection)
+    @ConfigItem(keyName = "lootBonesIfRoom", name = "Loot Superior dragon bones only if you have room", description = "", hidden = true, unhide = "lootBones", position = 52, section = lootSection)
     default boolean lootBonesIfRoom() {
         return false;
     }
@@ -318,11 +318,6 @@ public interface VorkathPlayerConfig extends Config {
             keyName = "advanced"
     )
     String advancedSection = "Advanced";
-
-    @ConfigItem(keyName = "invokes", name = "Use invokes*", description = "Increased *speculated* risk, use at your own risk.", position = 71, section = advancedSection)
-    default boolean invokes() {
-        return false;
-    }
 
     @ConfigItem(keyName = "debug", name = "Debug Messages", description = "", position = 72, section = advancedSection)
     default boolean debug() {
