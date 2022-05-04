@@ -328,9 +328,6 @@ public class VorkathPlayerPlugin extends iScript {
 						timeout+=3;
 					break;
 				case DRINK_ANTIVENOM:
-					if(!inventory.contains(config.prayer().getIds())){
-						teleToPoH();
-					}
 					inventory.interactWithItem(inventory.getFirst(config.antivenom().getIds()).getId(), sleepDelay(), "Drink");
 					timeout+=1;
 					break;
@@ -501,7 +498,11 @@ public class VorkathPlayerPlugin extends iScript {
 					NPC iceMinion = npcUtils.findNearestNpc(NpcID.ZOMBIFIED_SPAWN_8063);
 
 					if(player.getInteracting() != null && player.getInteracting().getName().equalsIgnoreCase("Vorkath")){
-						walkUtils.sceneWalk(playerLocal, 0, sleepDelay());
+						if(inventory.contains(getFoodId()) && game.modifiedLevel(Skill.HITPOINTS) <= game.baseLevel(Skill.HITPOINTS) - 25){
+							inventory.interactWithItem(getFoodId(), sleepDelay(), "Eat");
+						}else{
+							walkUtils.sceneWalk(playerLocal, 0, sleepDelay());
+						}
 						return;
 					}
 
@@ -521,6 +522,9 @@ public class VorkathPlayerPlugin extends iScript {
 					LocalPoint dodgeReset = new LocalPoint(6208, 7872);
 
 					if(isFireball && !player.getWorldLocation().equals(fireballPoint)){
+						if(player.getWorldLocation().distanceTo(fireballPoint) >= 2 && vorkathAlive != null){
+							actionNPC(vorkathAlive.id(), MenuAction.NPC_SECOND_OPTION, sleepDelay());
+						}
 						fireballPoint = null;
 						isFireball = false;
 						return;
@@ -750,7 +754,7 @@ public class VorkathPlayerPlugin extends iScript {
 						if(name.contains("bolts")){
 							bankUtils.withdrawAllItem(id);
 						}else{
-							bankUtils.withdrawItemAmount(id, amount);
+							bankUtils.withdrawItemAmount(id, amount - inventory.getCount(false, id));
 						}
 						timeout += inventoryItems.get(id) == 1 ? 0 : 4;
 						return;
@@ -1050,7 +1054,7 @@ public class VorkathPlayerPlugin extends iScript {
 			if(shouldDrinkVenom()){
 				if(!inventory.contains(config.antivenom().getIds()) && (vorkathAlive != null && !vorkathAlive.isDead()))
 					return TELEPORT_TO_POH;
-				if(inventory.contains(config.antifire().getIds()))
+				if(inventory.contains(config.antivenom().getIds()))
 					return DRINK_ANTIVENOM;
 			}
 
@@ -1087,7 +1091,7 @@ public class VorkathPlayerPlugin extends iScript {
 					&& !isAcid
 					&& !isMinion
 					&& !isFireball
-					&& !canSpec()
+					&& (!canSpec() || config.useRange())
 					&& !shouldLoot()
 					&& !player.isMoving()
 					&& baseTile.distanceTo(player.getWorldLocation()) >= 4)
@@ -1291,17 +1295,22 @@ public class VorkathPlayerPlugin extends iScript {
 		Collections.reverse(filtered);
 
 		if(!filtered.isEmpty()){
-			if(filtered.get(0).getId() == ItemID.SUPERIOR_DRAGON_BONES){
+			/*if(filtered.get(0).getId() == ItemID.SUPERIOR_DRAGON_BONES || filtered.get(0).getId() == ItemID.BLUE_DRAGONHIDE){
 				Collections.sort(filtered, Comparator.comparingInt(o -> o.getTile().getWorldLocation().distanceTo(client.getLocalPlayer().getWorldLocation())));
 			}
+			 */
+
+			if(filtered.get(0).getId() == ItemID.SUPERIOR_DRAGON_BONES)
+				return filtered.stream().filter(a -> a.getId() == ItemID.SUPERIOR_DRAGON_BONES).sorted(Comparator.comparingInt(o -> o.getTile().getWorldLocation().distanceTo(client.getLocalPlayer().getWorldLocation()))).findFirst().get();
+			if(filtered.get(0).getId() == ItemID.BLUE_DRAGONHIDE)
+				return filtered.stream().filter(a -> a.getId() == ItemID.BLUE_DRAGONHIDE).sorted(Comparator.comparingInt(o -> o.getTile().getWorldLocation().distanceTo(client.getLocalPlayer().getWorldLocation()))).findFirst().get();
+
 			return filtered.get(0);
 		}else{
 			if(!items.isEmpty() && !inventory.isFull() && (!hasFoodForKill() || !hasVenomForKill() || !hasPrayerForKill())){
-				TileItem nextItem = items.iterator().next();
-				if(!itemValues.containsKey(nextItem.getId()))
-					itemValues.put(nextItem.getId(), utils.getItemPrice(nextItem.getId(), true));
-
-				return nextItem;
+				List<TileItem> remains = items.stream().sorted(Comparator.comparingInt(b -> itemValues.get(b.getId()) * b.getQuantity())).collect(Collectors.toList());
+				if(!remains.isEmpty())
+					return remains.get(0);
 			}
 		}
 
@@ -1456,7 +1465,7 @@ public class VorkathPlayerPlugin extends iScript {
 	}
 
 	private boolean hasFoodForKill(){
-		return inventory.getFirst(config.food().getId()) != null && ((inventory.getCount(false, config.food().getId()) >= config.minFood()) && (inventory.contains(config.prayer().getIds()) || prayerUtils.getRemainingPoints() > 70));
+		return inventory.getFirst(config.food().getId()) != null && inventory.getCount(false, config.food().getId()) >= config.minFood();
 	}
 
 	private boolean hasPrayerForKill(){
@@ -1728,8 +1737,8 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 	}
 
-	public int getPotionDoses(int id) {
-		String partial = client.getItemComposition(id).getName().substring(0, 7);
+	public int getPotionDoses(int anyDoseId) {
+		String partial = client.getItemComposition(anyDoseId).getName().substring(0, 11);
 		int count = 0;
 		for(WidgetItem item : inventory.getAll(a -> client.getItemComposition(a.getId()).getName().contains(partial))){
 			String name = client.getItemComposition(item.getId()).getName();
