@@ -359,7 +359,7 @@ public class VorkathPlayerPlugin extends iScript {
 					inventory.interactWithItem(getMainhandId(), sleepDelay(), "Wield");
 					break;
 				case EQUIP_OH:
-					inventory.interactWithItem(getOffhandId(), sleepDelay(), "Wield");
+					inventory.interactWithItem(getOffhandId(), sleepDelay(), "Wield", "Equip", "Wear");
 					break;
 				case EQUIP_SPEC:
 					if(config.useSpec().getHands() == 2 && inventory.getFreeSlots() < 1){
