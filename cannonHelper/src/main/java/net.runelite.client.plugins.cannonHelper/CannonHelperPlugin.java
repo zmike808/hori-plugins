@@ -14,6 +14,7 @@ import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.basicapi.BasicApiPlugin;
 import net.runelite.client.plugins.basicapi.utils.Inventory;
+import net.runelite.client.plugins.basicapi.utils.PrayerUtils;
 import net.runelite.client.plugins.iutils.CalculationUtils;
 import net.runelite.client.plugins.iutils.WalkUtils;
 import net.runelite.client.plugins.iutils.game.Game;
@@ -44,6 +45,9 @@ public class CannonHelperPlugin extends iScript {
 
 	@Inject
 	private Inventory inventory;
+
+	@Inject
+	private PrayerUtils prayerUtils;
 
 	@Inject
 	private WalkUtils walkUtils;
@@ -130,11 +134,20 @@ public class CannonHelperPlugin extends iScript {
 		}
 
 		if(safeSpot != null){
-			if(player.getLocalLocation().equals(safeSpot)) return;
-			if(isRunning() && !player.isMoving()) walkUtils.sceneWalk(safeSpot, 0, sleepDelay());
+			if(!player.getLocalLocation().equals(safeSpot) && isRunning() && !player.isMoving())
+				walkUtils.sceneWalk(safeSpot, 0, sleepDelay());
 		}
 
+		if(config.restorePray() && shouldDrinkRestore() &&  inventory.contains(config.prayer().getIds())){
+			inventory.interactWithItem(inventory.getFirst(config.prayer().getIds()).getId(), sleepDelay(), "Drink");
+		}
+
+
 		game.tick();
+	}
+
+	public boolean shouldDrinkRestore(){
+		return prayerUtils.getRemainingPoints() <= 25;
 	}
 
 	@Subscribe

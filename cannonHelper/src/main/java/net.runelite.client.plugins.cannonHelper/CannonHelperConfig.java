@@ -26,8 +26,6 @@ package net.runelite.client.plugins.cannonHelper;
 
 import lombok.Getter;
 import net.runelite.api.ItemID;
-import net.runelite.api.ObjectID;
-import net.runelite.api.Skill;
 import net.runelite.client.config.*;
 
 @ConfigGroup("CannonHelperConfig")
@@ -113,85 +111,6 @@ public interface CannonHelperConfig extends Config {
     }
 
     @ConfigSection(
-            name = "Tick Delays",
-            description = "",
-            position = 7,
-            keyName = "tickDelays"
-    )
-    String tickDelays = "Tick Delays";
-
-    @Range(
-            min = 0,
-            max = 10
-    )
-    @ConfigItem(
-            keyName = "tickDelaysMin",
-            name = "Game Tick Min",
-            description = "",
-            position = 8,
-            section = tickDelays
-    )
-    default int tickDelaysMin() {
-        return 1;
-    }
-
-    @Range(
-            min = 0,
-            max = 10
-    )
-    @ConfigItem(
-            keyName = "tickDelaysMax",
-            name = "Game Tick Max",
-            description = "",
-            position = 9,
-            section = tickDelays
-    )
-    default int tickDelaysMax() {
-        return 3;
-    }
-
-    @Range(
-            min = 0,
-            max = 10
-    )
-    @ConfigItem(
-            keyName = "tickDelaysTarget",
-            name = "Game Tick Target",
-            description = "",
-            position = 10,
-            section = tickDelays
-    )
-    default int tickDelaysTarget() {
-        return 2;
-    }
-
-    @Range(
-            min = 0,
-            max = 10
-    )
-    @ConfigItem(
-            keyName = "tickDelaysDeviation",
-            name = "Game Tick Deviation",
-            description = "",
-            position = 11,
-            section = tickDelays
-    )
-    default int tickDelaysDeviation() {
-        return 1;
-    }
-
-    @ConfigItem(
-            keyName = "tickDelaysWeightedDistribution",
-            name = "Game Tick Weighted Distribution",
-            description = "Shifts the random distribution towards the lower end at the target, otherwise it will be an even distribution",
-            position = 12,
-            section = tickDelays
-    )
-    default boolean tickDelaysWeightedDistribution() {
-        return false;
-    }
-
-    @ConfigSection(
             name = "Settings",
             description = "",
             position = 13,
@@ -228,4 +147,34 @@ public interface CannonHelperConfig extends Config {
     )
     @ConfigItem(keyName = "maxBalls", name = "Max Cannonballs", description = "Maximum cannonballs before refilling", position = 18, title =  "maximumBalls")
     default int maximumBalls() { return 30; }
+
+    @ConfigItem(keyName = "restorePrayer", name = "Use Prayer potions", description = "Restore prayer using potions", position = 19)
+    default boolean restorePray() {
+        return false;
+    }
+
+    @ConfigItem(keyName = "prayerID", name = "Prayer restore", description = "Type of prayer point restore potion", position = 20)
+    default Prayer prayer() {
+        return Prayer.PRAYER_POTION;
+    }
+
+
+    enum Prayer {
+        PRAYER_POTION(ItemID.PRAYER_POTION4, ItemID.PRAYER_POTION3, ItemID.PRAYER_POTION2, ItemID.PRAYER_POTION1, ItemID.PRAYER_POTION4, ItemID.PRAYER_POTION3, ItemID.PRAYER_POTION2, ItemID.PRAYER_POTION1),
+        SUPER_RESTORE(ItemID.SUPER_RESTORE4, ItemID.SUPER_RESTORE3, ItemID.SUPER_RESTORE2, ItemID.SUPER_RESTORE1, ItemID.SUPER_RESTORE4, ItemID.SUPER_RESTORE3, ItemID.SUPER_RESTORE2, ItemID.SUPER_RESTORE1);
+
+        @Getter
+        private final int dose4, dose3, dose2, dose1;
+
+        @Getter
+        private int[] ids;
+
+        Prayer(int dose4, int dose3, int dose2, int dose1, int... ids) {
+            this.dose1 = dose1;
+            this.dose2 = dose2;
+            this.dose3 = dose3;
+            this.dose4 = dose4;
+            this.ids = ids;
+        }
+    }
 }
