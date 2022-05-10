@@ -1317,7 +1317,7 @@ public class VorkathPlayerPlugin extends iScript {
 					String name = client.getItemComposition(a.getId()).getName().toLowerCase();
 					return (config.excludedItems().isBlank() || excludedItems.stream().noneMatch(name::contains));
 				}).sorted(Comparator.comparingInt(b -> itemValues.get(b.getId()) * b.getQuantity())).collect(Collectors.toList());
-
+				Collections.reverse(remains);
 				if(!remains.isEmpty())
 					return remains.get(0);
 			}
@@ -1724,7 +1724,7 @@ public class VorkathPlayerPlugin extends iScript {
 		int lootValue = loot.getId() == ItemID.VORKATHS_HEAD ? 75000 : itemValues.get(loot.getId()) * loot.getQuantity();
 
 		for(WidgetItem item : inventory.getAll()){
-			if(item == null || !client.getItemComposition(item.getId()).isTradeable() || item.getId() == config.houseTele().getId()) continue;
+			if(item == null || client.getItemComposition(item.getId()).getName().equalsIgnoreCase(client.getItemComposition(loot.getId()).getName()) || !client.getItemComposition(item.getId()).isTradeable() || item.getId() == config.houseTele().getId()) continue;
 
 			if(itemValues.containsKey(item.getId())){
 				if((itemValues.get(item.getId()) * item.getQuantity()) < (lootValue + 750)){
