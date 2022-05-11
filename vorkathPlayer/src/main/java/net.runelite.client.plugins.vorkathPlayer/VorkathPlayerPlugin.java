@@ -1149,15 +1149,20 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 
 		if(isInPOH()) {
+			GameObject pool = new GameObjectQuery().filter(a -> a.getName().contains("pool") && Arrays.stream(a.getActions()).anyMatch(b -> b != null && b.contains("Drink"))).result(client).first();
+
 			if(!playerUtils.isRunEnabled()) return TOGGLE_RUN;
 			if(prayerUtils.isQuickPrayerActive()) return PRAYER_OFF;
 			if(config.useAltar() && game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER))
 				return USE_ALTAR;
-			if (!config.useAltar() && config.usePool() && (game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS)
-					|| game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER)
-					|| getSpecialPercent() < 100)) {
+
+			if (!config.useAltar() && config.usePool() && pool != null &&
+					((pool.getName().contains("Ornate") && game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS))
+					|| ((!pool.getName().contains("Restoration") && !pool.getName().contains("Revitalisation")) && game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER))
+					|| (getSpecialPercent() < 100))) {
 				return USE_POOL;
 			}
+
 			return USE_PORTAL;
 		}
 
