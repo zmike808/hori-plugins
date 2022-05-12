@@ -1732,7 +1732,7 @@ public class VorkathPlayerPlugin extends iScript {
 			if(item == null || client.getItemComposition(item.getId()).getName().equalsIgnoreCase(client.getItemComposition(loot.getId()).getName()) || !client.getItemComposition(item.getId()).isTradeable() || item.getId() == config.houseTele().getId()) continue;
 
 			if(itemValues.containsKey(item.getId())){
-				if((itemValues.get(item.getId()) * item.getQuantity()) < (lootValue + 750)){
+				if((itemValues.get(item.getId()) * item.getQuantity()) < (lootValue - 1000)){
 					return item;
 				}
 			}else{
