@@ -310,11 +310,11 @@ public class VorkathPlayerPlugin extends iScript {
 				chinBreakHandler.startBreak(this);
 				break;
 			case LOW_RUNES:
-				game.sendGameMessage("PROBLEM: Incorrect / low runes. Please use Law/Chaos/Dust and have more than 100 of each.");
+				game.sendGameMessage("PROBLEM: Incorrect / low runes. Please use Law/Chaos/Dust and have more than 100 of each IN THE RUNE POUCH LOL. Please don't come to discord and ask why this isnt working");
 				stop();
 				break;
 			case SPELLBOOK_STOP:
-				game.sendGameMessage("PROBLEM: Incorrect spellbook. Please switch to the normal spellbook.");
+				game.sendGameMessage("PROBLEM: Incorrect spellbook. Please switch to the normal spellbook. You can donate the 100k you would've lost to me if you want");
 				stop();
 				break;
 		}
@@ -567,7 +567,7 @@ public class VorkathPlayerPlugin extends iScript {
 
 					break;
 				case USE_POOL:
-					GameObject pool = new GameObjectQuery().filter(a -> a.getName().contains("pool") && Arrays.stream(a.getActions()).anyMatch(b -> b != null && b.contains("Drink"))).result(client).first();
+					GameObject pool = new GameObjectQuery().filter(a -> a.getName().toLowerCase().contains("pool") && Arrays.stream(a.getActions()).anyMatch(b -> b != null && b.contains("Drink"))).result(client).first();
 
 					if(pool != null && !player.isMoving())
 						actionObject(pool.getId(), MenuAction.GAME_OBJECT_FIRST_OPTION, null);
@@ -905,7 +905,7 @@ public class VorkathPlayerPlugin extends iScript {
 
 		if (configButtonClicked.getKey().equalsIgnoreCase("startVorkath")) {
 			if (!startPlugin) {
-				game.sendGameMessage("Vorkath Started");
+				game.sendGameMessage("Vorkath Started, please wait a moment for item values to be cached");
 				startPlugin = true;
 				includedItems = Arrays.asList(config.includedItems().toLowerCase().split("\\s*,\\s*"));
 				excludedItems = Arrays.asList(config.excludedItems().toLowerCase().split("\\s*,\\s*"));
@@ -1149,16 +1149,16 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 
 		if(isInPOH()) {
-			GameObject pool = new GameObjectQuery().filter(a -> a.getName().contains("pool") && Arrays.stream(a.getActions()).anyMatch(b -> b != null && b.contains("Drink"))).result(client).first();
+			GameObject pool = new GameObjectQuery().filter(a -> a.getName().toLowerCase().contains("pool") && Arrays.stream(a.getActions()).anyMatch(b -> b != null && b.contains("Drink"))).result(client).first();
 
 			if(!playerUtils.isRunEnabled()) return TOGGLE_RUN;
 			if(prayerUtils.isQuickPrayerActive()) return PRAYER_OFF;
 			if(config.useAltar() && game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER))
 				return USE_ALTAR;
 
-			if (!config.useAltar() && config.usePool() && pool != null &&
-					((pool.getName().contains("Ornate") && game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS))
-					|| ((!pool.getName().contains("Restoration") && !pool.getName().contains("Revitalisation")) && game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER))
+			if (config.usePool() && pool != null &&
+					((pool.getName().toLowerCase().contains("ornate") && game.modifiedLevel(Skill.HITPOINTS) < game.baseLevel(Skill.HITPOINTS))
+					|| ((!pool.getName().toLowerCase().contains("restoration") && !pool.getName().toLowerCase().contains("revitalisation")) && game.modifiedLevel(Skill.PRAYER) < game.baseLevel(Skill.PRAYER))
 					|| (getSpecialPercent() < 100))) {
 				return USE_POOL;
 			}

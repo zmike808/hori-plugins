@@ -270,7 +270,7 @@ public interface VorkathPlayerConfig extends Config {
         return false;
     }
 
-    @ConfigItem(keyName = "usePool", name = "Use PoH pool", description = "Use POH rejuvenation pool",hidden = false, hide = "useAltar", position = 36, section = teleportsSection)
+    @ConfigItem(keyName = "usePool", name = "Use PoH pool", description = "Use POH rejuvenation pool", position = 36, section = teleportsSection)
     default boolean usePool() {
         return true;
     }
