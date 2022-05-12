@@ -1270,7 +1270,7 @@ public class VorkathPlayerPlugin extends iScript {
 			if(inventory.isFull() && (inventory.contains(getFoodId()) || itemToDrop(getLoot()) != null)) return true;
 		}
 
-		return !inventory.isFull() || !hasFoodForKill() || !hasPrayerForKill() || !hasVenomForKill() || (client.getItemComposition(getLoot().getId()).isStackable() && inventory.contains(getLoot().getId()));
+		return !inventory.isFull() || ((!hasFoodForKill() || !hasPrayerForKill() || !hasVenomForKill()) && itemToDrop(getLoot()) != null) || (client.getItemComposition(getLoot().getId()).isStackable() && inventory.contains(getLoot().getId()));
 
 
 		/*if(getLoot().getId() == ItemID.SUPERIOR_DRAGON_BONES){
