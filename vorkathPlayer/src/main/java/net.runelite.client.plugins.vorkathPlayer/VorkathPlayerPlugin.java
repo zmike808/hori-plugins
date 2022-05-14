@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import static net.runelite.api.GraphicID.VORKATH_BOMB_AOE;
 import static net.runelite.api.GraphicID.VORKATH_ICE;
 import static net.runelite.api.ObjectID.ACID_POOL_32000;
+import static net.runelite.api.ObjectID.PATH;
 import static net.runelite.client.plugins.vorkathPlayer.VorkathPlayerStates.*;
 
 @Extension
@@ -440,20 +441,24 @@ public class VorkathPlayerPlugin extends iScript {
 							}else{
 								lastTile = acidFreePath.get(acidFreePath.size() - 1);
 							}
-
 							log.info("First tile: " + firstTile);
 							log.info("Last Tile: " + lastTile);
 							log.info("Actual length: " + (firstTile.getX() != lastTile.getX() ? Math.abs(firstTile.getX() - lastTile.getX()) : Math.abs(firstTile.getY() - lastTile.getY())));
-
+							LocalPoint localDestination = client.getLocalDestinationLocation();
+							WorldPoint worldDestination = null;
+							if(localDestination != null)
+								worldDestination = WorldPoint.fromLocal(client, localDestination);
 
 							if(acidFreePath.contains(player.getWorldLocation())){
 								if(player.getWorldLocation().equals(firstTile)){
 									walkUtils.sceneWalk(lastTile, 0, calc.getRandomIntBetweenRange(20, 70));
+									return;
 								}
 								if(player.getWorldLocation().equals(lastTile)){
 									walkUtils.sceneWalk(firstTile, 0, calc.getRandomIntBetweenRange(20, 70));
+									return;
 								}
-							}else if(!player.isMoving()){
+							}else if(!player.isMoving() || (worldDestination == null || (!worldDestination.equals(firstTile) && !worldDestination.equals(lastTile)))){
 								walkUtils.sceneWalk(lastTile, 0, 0);
 							}
 
