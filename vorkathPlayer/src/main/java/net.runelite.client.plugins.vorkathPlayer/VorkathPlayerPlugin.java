@@ -451,11 +451,11 @@ public class VorkathPlayerPlugin extends iScript {
 
 							if(acidFreePath.contains(player.getWorldLocation())){
 								if(player.getWorldLocation().equals(firstTile)){
-									walkUtils.sceneWalk(lastTile, 0, calc.getRandomIntBetweenRange(20, 70));
+									walkUtils.sceneWalk(lastTile, 0, calc.getRandomIntBetweenRange(20, 40));
 									return;
 								}
 								if(player.getWorldLocation().equals(lastTile)){
-									walkUtils.sceneWalk(firstTile, 0, calc.getRandomIntBetweenRange(20, 70));
+									walkUtils.sceneWalk(firstTile, 0, calc.getRandomIntBetweenRange(20, 40));
 									return;
 								}
 							}else if(!player.isMoving() || (worldDestination == null || (!worldDestination.equals(firstTile) && !worldDestination.equals(lastTile)))){
