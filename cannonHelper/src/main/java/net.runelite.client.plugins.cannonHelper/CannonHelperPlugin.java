@@ -142,7 +142,6 @@ public class CannonHelperPlugin extends iScript {
 			inventory.interactWithItem(inventory.getFirst(config.prayer().getIds()).getId(), sleepDelay(), "Drink");
 		}
 
-
 		game.tick();
 	}
 

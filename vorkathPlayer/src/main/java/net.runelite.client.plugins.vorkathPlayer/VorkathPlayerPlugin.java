@@ -245,7 +245,6 @@ public class VorkathPlayerPlugin extends iScript {
 
 	@Subscribe
 	public void onGameTick(GameTick event){
-		//if(client.getLocalPlayer() == null || client.getGameState() != GameState.LOGGED_IN || !startPlugin) return;
 		if(!startPlugin || chinBreakHandler.isBreakActive(this))
 			return;
 
