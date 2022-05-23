@@ -240,12 +240,18 @@ public interface VorkathPlayerConfig extends Config {
         return Antivenom.SERPENTINE_HELM;
     }
 
-    @ConfigItem(keyName = "superCombatID", name = "Boost", description = "The name of your boost potion", position = 30, section = consumablesSection)
+    @Range(min = 1, max = 3)
+    @ConfigItem(keyName = "venomAmount", name = "Amount of antivenoms", description = "Amount of antivenoms to bring", position = 30, section = consumablesSection)
+    default int venomAmount() {
+        return 1;
+    }
+
+    @ConfigItem(keyName = "superCombatID", name = "Boost", description = "The name of your boost potion", position = 31, section = consumablesSection)
     default BoostPotion boostPotion() {
         return BoostPotion.DIVINE_SUPER_COMBAT;
     }
 
-    @ConfigItem(keyName = "boostLevel", name = "Boost offset", description = "Will drink when the boost amount is less than this value<br>If you want to drink at or below 105 range and you have 99<br>This value should be 6", position = 31, section = consumablesSection)
+    @ConfigItem(keyName = "boostLevel", name = "Boost offset", description = "Will drink when the boost amount is less than this value<br>If you want to drink at or below 105 range and you have 99<br>This value should be 6", position = 32, section = consumablesSection)
     default int boostLevel() {
         return 1;
     }
@@ -253,66 +259,66 @@ public interface VorkathPlayerConfig extends Config {
     @ConfigSection(
             name = "Teleports",
             description = "",
-            position = 32,
+            position = 33,
             keyName = "teleportsSection",
             closedByDefault = true
     )
     String teleportsSection = "Teleports";
 
-    @ConfigItem(keyName = "houseTele", name = "PoH", description = "The name of your house teleport", position = 33, section = teleportsSection)
+    @ConfigItem(keyName = "houseTele", name = "PoH", description = "The name of your house teleport", position = 34, section = teleportsSection)
     default HouseTele houseTele() { return HouseTele.HOUSE_TELEPORT; }
 
-    @ConfigItem(keyName = "pouchID", name = "Rune Pouch ID", description = "ID of rune pouch", position = 34, section = teleportsSection)
+    @ConfigItem(keyName = "pouchID", name = "Rune Pouch ID", description = "ID of rune pouch", position = 35, section = teleportsSection)
     default int pouchID() { return ItemID.RUNE_POUCH; }
 
-    @ConfigItem(keyName = "useAltar", name = "Use PoH Altar", description = "Use POH Altar instead of pool", position = 35, section = teleportsSection)
+    @ConfigItem(keyName = "useAltar", name = "Use PoH Altar", description = "Use POH Altar instead of pool", position = 36, section = teleportsSection)
     default boolean useAltar() {
         return false;
     }
 
-    @ConfigItem(keyName = "usePool", name = "Use PoH pool", description = "Use POH rejuvenation pool", position = 36, section = teleportsSection)
+    @ConfigItem(keyName = "usePool", name = "Use PoH pool", description = "Use POH rejuvenation pool", position = 37, section = teleportsSection)
     default boolean usePool() {
         return true;
     }
 
-    @ConfigItem(keyName = "rellekkaTele", name = "Rellekka", description = "The method of travelling to Rellekka after banking", position = 37, section = teleportsSection)
+    @ConfigItem(keyName = "rellekkaTele", name = "Rellekka", description = "The method of travelling to Rellekka after banking", position = 38, section = teleportsSection)
     default RellekkaTele rellekkaTeleport() { return RellekkaTele.TALK_TO_BANKER; }
 
     @ConfigSection(
             name = "Loot",
             description = "",
-            position = 38,
+            position = 39,
             keyName = "lootSection",
             closedByDefault = true
     )
             String lootSection = "Loot";
 
-    @ConfigItem(keyName = "lootBones", name = "Loot Superior dragon bones", description = "", position = 39, section = lootSection)
+    @ConfigItem(keyName = "lootBones", name = "Loot Superior dragon bones", description = "", position = 40, section = lootSection)
     default boolean lootBones() {
         return true;
     }
 
-    @ConfigItem(keyName = "lootBonesIfRoom", name = "Loot Superior dragon bones only if you have room", description = "", hidden = true, unhide = "lootBones", position = 40, section = lootSection)
+    @ConfigItem(keyName = "lootBonesIfRoom", name = "Loot Superior dragon bones only if you have room", description = "", hidden = true, unhide = "lootBones", position = 41, section = lootSection)
     default boolean lootBonesIfRoom() {
         return false;
     }
 
-    @ConfigItem(keyName = "eatLoot", name = "Loot Prioritization", description = "Prioritizes loot over food.<br>Not to be confused with automatic loot filtering by value!", position = 41, section = lootSection)
+    @ConfigItem(keyName = "eatLoot", name = "Loot Prioritization", description = "Prioritizes loot over food.<br>Not to be confused with automatic loot filtering by value!", position = 42, section = lootSection)
     default boolean eatLoot() {
         return true;
     }
 
-    @ConfigItem(keyName = "lootValue", name = "Minimum value of loot", description = "Loot drops over this value.", position = 42, section = lootSection)
+    @ConfigItem(keyName = "lootValue", name = "Minimum value of loot", description = "Loot drops over this value.", position = 43, section = lootSection)
     default int lootValue() {
         return 25000;
     }
 
-    @ConfigItem(keyName = "includedItems", name = "Included items", description = "Full or partial names of items to loot regardless of value<br>Separate with a comma.", position = 43, section = lootSection)
+    @ConfigItem(keyName = "includedItems", name = "Included items", description = "Full or partial names of items to loot regardless of value<br>Separate with a comma.", position = 44, section = lootSection)
     default String includedItems() {
         return "rune longsword,wrath rune";
     }
 
-    @ConfigItem(keyName = "excludedItems", name = "Excluded items", description = "Full or partial names of items not to loot<br>Separate with a comma.", position = 44, section = lootSection)
+    @ConfigItem(keyName = "excludedItems", name = "Excluded items", description = "Full or partial names of items not to loot<br>Separate with a comma.", position = 45, section = lootSection)
     default String excludedItems() {
         return "ruby bolt,diamond bolt,emerald bolt,dragonstone bolt";
     }
@@ -320,13 +326,13 @@ public interface VorkathPlayerConfig extends Config {
     @ConfigSection(
             name = "Advanced",
             description = "",
-            position = 45,
+            position = 46,
             keyName = "advanced",
             closedByDefault = true
     )
     String advancedSection = "Advanced";
 
-    @ConfigItem(keyName = "debug", name = "Debug Messages", description = "", position = 46, section = advancedSection)
+    @ConfigItem(keyName = "debug", name = "Debug Messages", description = "", position = 47, section = advancedSection)
     default boolean debug() {
         return false;
     }

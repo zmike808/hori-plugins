@@ -141,7 +141,6 @@ public class CannonHelperPlugin extends iScript {
 		if(config.restorePray() && shouldDrinkRestore() &&  inventory.contains(config.prayer().getIds())){
 			inventory.interactWithItem(inventory.getFirst(config.prayer().getIds()).getId(), sleepDelay(), "Drink");
 		}
-
 		game.tick();
 	}
 

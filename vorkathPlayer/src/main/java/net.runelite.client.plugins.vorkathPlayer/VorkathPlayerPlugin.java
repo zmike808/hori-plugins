@@ -23,6 +23,7 @@ import net.runelite.client.plugins.iutils.*;
 import net.runelite.client.plugins.iutils.api.SpellBook;
 import net.runelite.client.plugins.iutils.game.Game;
 import net.runelite.client.plugins.iutils.game.iNPC;
+import net.runelite.client.plugins.iutils.game.iObject;
 import net.runelite.client.plugins.iutils.scripts.ReflectBreakHandler;
 import net.runelite.client.plugins.iutils.scripts.iScript;
 import net.runelite.client.plugins.iutils.ui.Chatbox;
@@ -38,7 +39,6 @@ import java.util.stream.Collectors;
 import static net.runelite.api.GraphicID.VORKATH_BOMB_AOE;
 import static net.runelite.api.GraphicID.VORKATH_ICE;
 import static net.runelite.api.ObjectID.ACID_POOL_32000;
-import static net.runelite.api.ObjectID.PATH;
 import static net.runelite.client.plugins.vorkathPlayer.VorkathPlayerStates.*;
 
 @Extension
@@ -571,20 +571,27 @@ public class VorkathPlayerPlugin extends iScript {
 
 					break;
 				case USE_POOL:
-					GameObject pool = new GameObjectQuery().filter(a -> a.getName().toLowerCase().contains("pool") && Arrays.stream(a.getActions()).anyMatch(b -> b != null && b.contains("Drink"))).result(client).first();
+					//GameObject pool = new GameObjectQuery().filter(a -> a.getName().toLowerCase().contains("pool") && Arrays.stream(a.getActions()).anyMatch(b -> b != null && b.contains("Drink"))).result(client).nearestTo(client.getLocalPlayer());
+					iObject pool = game.objects().filter(a -> a.name().toLowerCase().contains("pool")).withAction("Drink").nearest();
 
 					if(pool != null && !player.isMoving())
-						actionObject(pool.getId(), MenuAction.GAME_OBJECT_FIRST_OPTION, null);
+						actionObject(pool.id(), MenuAction.GAME_OBJECT_FIRST_OPTION, null);
 
 					timeout+=1;
 					break;
 				case USE_PORTAL:
-					GameObject portal = new GameObjectQuery().filter(a -> {
+					/*GameObject portal = new GameObjectQuery().filter(a -> {
 						return Arrays.stream(a.getActions()).anyMatch(b -> b != null && b.equalsIgnoreCase("Lunar Isle")) || (a.getName().contains("Lunar Isle") && Arrays.stream(a.getActions()).anyMatch(c -> c != null && c.contains("Enter")));
-					}).result(client).first();
-
-					if(portal != null && !player.isMoving())
-						actionObject(portal.getId(), MenuAction.GAME_OBJECT_FIRST_OPTION, null);
+					}).result(client).nearestTo(client.getLocalPlayer());
+					 */
+					iObject portal1 = game.objects().filter(a -> a.actions().contains("Lunar Isle") || (a.name().contains("Lunar Isle") && a.actions().contains("Enter"))).nearest();
+					if(portal1 != null && !player.isMoving()) {
+						if (config.debug())
+							game.sendGameMessage("Portal isn't null, attempting to use");
+						actionObject(portal1.id(), MenuAction.GAME_OBJECT_FIRST_OPTION, null);
+					}else if(portal1 == null){
+						game.sendGameMessage("Portal is null, try zoom out?");
+					}
 
 					timeout+=1;
 					break;
@@ -1054,7 +1061,7 @@ public class VorkathPlayerPlugin extends iScript {
 			}
 
 			if(shouldDrinkVenom()){
-				if(!isVorkathAsleep() && !inventory.contains(config.antivenom().getIds()) && vorkathAlive != null && !vorkathAlive.isDead())
+				if(!isVorkathAsleep() && !inventory.contains(config.antivenom().getIds()) && vorkathAlive != null && !vorkathAlive.isDead() && (calculateHealth(vorkathAlive) > 75))
 					return TELEPORT_TO_POH;
 				if(inventory.contains(config.antivenom().getIds()))
 					return DRINK_ANTIVENOM;
@@ -1601,7 +1608,7 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 
 		if(config.antivenom().getDose4() != ItemID.SERPENTINE_HELM){
-			inventoryItems.put(config.antivenom().getDose4(), 1);
+			inventoryItems.put(config.antivenom().getDose4(), config.venomAmount());
 		}
 
 		if(config.useRange() && config.useSwitches()){

@@ -242,22 +242,26 @@ public class VorkathHelperPlugin extends iScript {
 						}else{
 							lastTile = acidFreePath.get(acidFreePath.size() - 1);
 						}
-
 						log.info("First tile: " + firstTile);
 						log.info("Last Tile: " + lastTile);
 						log.info("Actual length: " + (firstTile.getX() != lastTile.getX() ? Math.abs(firstTile.getX() - lastTile.getX()) : Math.abs(firstTile.getY() - lastTile.getY())));
+						LocalPoint localDestination = client.getLocalDestinationLocation();
+						WorldPoint worldDestination = null;
+						if(localDestination != null)
+							worldDestination = WorldPoint.fromLocal(client, localDestination);
 
 						if(acidFreePath.contains(player.getWorldLocation())){
 							if(player.getWorldLocation().equals(firstTile)){
-								walkUtils.sceneWalk(lastTile, 0, sleepDelay());
+								walkUtils.sceneWalk(lastTile, 0, calc.getRandomIntBetweenRange(20, 40));
+								return;
 							}
 							if(player.getWorldLocation().equals(lastTile)){
-								walkUtils.sceneWalk(firstTile, 0, sleepDelay());
+								walkUtils.sceneWalk(firstTile, 0, calc.getRandomIntBetweenRange(20, 40));
+								return;
 							}
-						}else if(!player.isMoving()){
+						}else if(!player.isMoving() || (worldDestination == null || (!worldDestination.equals(firstTile) && !worldDestination.equals(lastTile)))){
 							walkUtils.sceneWalk(lastTile, 0, 0);
 						}
-
 					}
 				}
 				else {
@@ -460,6 +464,7 @@ public class VorkathHelperPlugin extends iScript {
 	If the user uses the ranged woox walk, it will create a row at the entrance of the instance that will then be used to create a secondary walk tile in front
 	Blowpipe walk does the above, but 2 tiles in front due to the range of the weapon.
 	 */
+
 	public void createSafetiles(){
 		if(isAtVorkath()){
 			if(safeMeleeTiles.size() > 8) safeMeleeTiles.clear();
