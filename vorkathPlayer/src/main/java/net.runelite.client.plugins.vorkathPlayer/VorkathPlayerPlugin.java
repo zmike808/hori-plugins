@@ -1280,23 +1280,10 @@ public class VorkathPlayerPlugin extends iScript {
 		if(config.eatLoot()){
 			if(inventory.isFull() && (inventory.contains(getFoodId()) || itemToDrop(getLoot()) != null)) return true;
 		}
+		if(getSpecId() != -1 && config.useSpec().getHands() == 2 && getSpecialPercent() >= config.useSpec().getSpecAmt() && inventory.getFreeSlots() == 1 && hasPrayerForKill() && hasFoodForKill() && hasVenomForKill())
+			return false;
 
-		return !inventory.isFull() || ((!hasFoodForKill() || !hasPrayerForKill() || !hasVenomForKill()) && itemToDrop(getLoot()) != null) || (client.getItemComposition(getLoot().getId()).isStackable() && inventory.contains(getLoot().getId()));
-
-
-		/*if(getLoot().getId() == ItemID.SUPERIOR_DRAGON_BONES){
-			if(inventory.isFull() && !hasFoodForKill() && (inventory.getFirst(getFoodId()) != null || itemToDrop(getLoot()) != null)) return true;
-			if(inventory.isFull() && config.lootBonesIfRoom() && hasFoodForKill() && hasPrayerForKill() && hasVenomForKill()) return false;
-		}
-
-		if(config.eatLoot()){
-			if(inventory.isFull() && hasFoodForKill()) return true;
-			if(inventory.isFull() && itemToDrop(getLoot()) != null) return true;
-		}
-
-		return isVorkathAsleep() && (!inventory.isFull() || (!hasFoodForKill() && !config.eatLoot() && itemToDrop(getLoot()) != null));
-		 */
-
+		return (!inventory.isFull()) || ((!hasFoodForKill() || !hasPrayerForKill() || !hasVenomForKill()) && itemToDrop(getLoot()) != null) || (client.getItemComposition(getLoot().getId()).isStackable() && inventory.contains(getLoot().getId()));
 	}
 
 	public TileItem getLoot() {
