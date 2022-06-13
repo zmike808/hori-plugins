@@ -389,7 +389,7 @@ public class VorkathPlayerPlugin extends iScript {
 						if(!playerUtils.isMoving())
 							lootItem(getLoot());
 					}else{
-						if(config.eatLoot() && inventory.contains(getFoodId())){
+						if(config.lootPrio() && inventory.contains(getFoodId())){
 							if(config.debug())
 								game.sendGameMessage("Eating food to make room for loot");
 							inventory.interactWithItem(getFoodId(), sleepDelay(), "Eat");
@@ -590,7 +590,16 @@ public class VorkathPlayerPlugin extends iScript {
 							game.sendGameMessage("Portal isn't null, attempting to use");
 						actionObject(portal1.id(), MenuAction.GAME_OBJECT_FIRST_OPTION, null);
 					}else if(portal1 == null){
-						game.sendGameMessage("Portal is null, try zoom out?");
+						game.sendGameMessage("Severe error: Can't find portal. Attemping to teleport to reload instance. If that doesn't fix it, please stop and move your portal closer.");
+						if(client.getGameState() != GameState.LOADING){
+							if(optionExists("Cast teleport anyway")){
+								chooseOption("Cast teleport anyway");
+								timeout += 9;
+							}else{
+								teleToPoH();
+								timeout += 1;
+							}
+						}
 					}
 
 					timeout+=1;
@@ -1106,8 +1115,9 @@ public class VorkathPlayerPlugin extends iScript {
 					&& baseTile.distanceTo(player.getWorldLocation()) >= 4)
 				return DISTANCE_CHECK;
 
-			if(canSpec() && (isWakingUp() || (vorkathAlive != null && !vorkathAlive.isDead()))){
+			if(isSpecActive() || (canSpec() && (isWakingUp() || (vorkathAlive != null && !vorkathAlive.isDead() && calculateHealth(vorkathAlive) >= 750)))){
 				if(isItemEquipped(getSpecId())){
+					//if(isSpecActive() && (player.getInteracting() == null || !player.getInteracting().getName().equalsIgnoreCase("Vorkath"))){
 					if(isSpecActive()){
 						return RETALIATE;
 					}else{
@@ -1277,7 +1287,7 @@ public class VorkathPlayerPlugin extends iScript {
 		if(getLoot().getId() == ItemID.SUPERIOR_DRAGON_BONES){
 			if(inventory.isFull() && config.lootBonesIfRoom() && hasPrayerForKill() && hasFoodForKill() && hasVenomForKill()) return false;
 		}
-		if(config.eatLoot()){
+		if(config.lootPrio()){
 			if(inventory.isFull() && (inventory.contains(getFoodId()) || itemToDrop(getLoot()) != null)) return true;
 		}
 		if(getSpecId() != -1 && config.useSpec().getHands() == 2 && getSpecialPercent() >= config.useSpec().getSpecAmt() && inventory.getFreeSlots() == 1 && hasPrayerForKill() && hasFoodForKill() && hasVenomForKill())
@@ -1325,7 +1335,6 @@ public class VorkathPlayerPlugin extends iScript {
 					return remains.get(0);
 			}
 		}
-
 		return null;
 	}
 
@@ -1714,6 +1723,7 @@ public class VorkathPlayerPlugin extends iScript {
 			String name = client.getItemComposition(itemToDrop.getId()).getName();
 			if((name.contains("(1)") && !name.contains("Prayer")) || (!config.usePool() && !config.useAltar() && name.contains("Prayer"))){
 				inventory.interactWithItem(itemToDrop.getId(), sleepDelay(), "Drink");
+				return;
 			}
 			if(itemToDrop.getId() == getFoodId()){
 				inventory.interactWithItem(itemToDrop.getId(), sleepDelay(), "Eat");
@@ -1749,6 +1759,14 @@ public class VorkathPlayerPlugin extends iScript {
 		}
 	}
 
+	public boolean optionExists(String part) {
+		if(game.widget(219, 1) == null) return false;
+		for (var i = 0; i < game.widget(219, 1).items().size(); i++) {
+			if (game.widget(219, 1, i).text() != null && game.widget(219, 1, i).text().contains(part))
+				return true;
+		}
+		return false;
+	}
 	public int getPotionDoses(int anyDoseId) {
 		String partial = client.getItemComposition(anyDoseId).getName().substring(0, 11);
 		int count = 0;

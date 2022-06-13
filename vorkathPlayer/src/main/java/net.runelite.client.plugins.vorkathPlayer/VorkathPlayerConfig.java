@@ -303,8 +303,8 @@ public interface VorkathPlayerConfig extends Config {
         return false;
     }
 
-    @ConfigItem(keyName = "eatLoot", name = "Loot Prioritization", description = "Prioritizes loot over food.<br>Not to be confused with automatic loot filtering by value!", position = 42, section = lootSection)
-    default boolean eatLoot() {
+    @ConfigItem(keyName = "lootPrio", name = "Loot Prioritization", description = "Prioritizes loot over food.<br>Not to be confused with automatic loot filtering by value!", position = 42, section = lootSection)
+    default boolean lootPrio() {
         return true;
     }
 
