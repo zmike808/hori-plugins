@@ -1578,7 +1578,8 @@ public class VorkathPlayerPlugin extends iScript {
 			case ItemID.CONSTRUCT_CAPET:
 			case ItemID.CONSTRUCT_CAPE:
 			case ItemID.TELEPORT_TO_HOUSE:
-				inventory.interactWithItem(config.houseTele().getId(), sleepDelay(), "Tele to POH", "Break");
+				if(inventory.contains(config.houseTele().getId()))
+					inventory.interactWithItem(config.houseTele().getId(), sleepDelay(), "Tele to POH", "Break");
 				break;
 			case -1:
 				Widget widget = client.getWidget(WidgetInfo.SPELL_TELEPORT_TO_HOUSE);
