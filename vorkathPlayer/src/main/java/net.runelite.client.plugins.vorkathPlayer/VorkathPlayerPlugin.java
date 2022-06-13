@@ -1115,7 +1115,7 @@ public class VorkathPlayerPlugin extends iScript {
 					&& baseTile.distanceTo(player.getWorldLocation()) >= 4)
 				return DISTANCE_CHECK;
 
-			if(isSpecActive() || (canSpec() && (isWakingUp() || (vorkathAlive != null && !vorkathAlive.isDead() && calculateHealth(vorkathAlive) >= 750)))){
+			if(canSpec() && (isWakingUp() || (vorkathAlive != null && !vorkathAlive.isDead() && (calculateHealth(vorkathAlive) == -1 || calculateHealth(vorkathAlive) >= 750)))){
 				if(isItemEquipped(getSpecId())){
 					//if(isSpecActive() && (player.getInteracting() == null || !player.getInteracting().getName().equalsIgnoreCase("Vorkath"))){
 					if(isSpecActive()){
