@@ -41,7 +41,7 @@ subprojects {
         jcenter {
             content {
                 excludeGroupByRegex("net\\.unethicalite.*")
-                excludeGroupByRegex("com\\.openosrs.*")
+//                excludeGroupByRegex("com\\.openosrs.*")
             }
         }
 
@@ -51,7 +51,7 @@ subprojects {
             }
             filter {
                 includeGroupByRegex("net\\.unethicalite.*")
-                includeGroupByRegex("com\\.openosrs.*")
+//                includeGroupByRegex("com\\.openosrs.*")
             }
         }
     }
@@ -66,10 +66,10 @@ subprojects {
         compileOnly("net.unethicalite:runelite-api:$unethicaliteVersion+")
         compileOnly("net.unethicalite:runelite-client:$unethicaliteVersion+")
         compileOnly("net.unethicalite.rs:runescape-api:$unethicaliteVersion+")
-        compileOnly("com.openosrs:http-api:${ProjectVersions.openosrsVersion}+")
-        compileOnly("com.openosrs:runelite-api:${ProjectVersions.openosrsVersion}+")
-        compileOnly("com.openosrs:runelite-client:${ProjectVersions.openosrsVersion}+")
-        compileOnly("com.openosrs.rs:runescape-api:${ProjectVersions.openosrsVersion}+")
+//        compileOnly("com.openosrs:http-api:${ProjectVersions.openosrsVersion}+")
+//        compileOnly("com.openosrs:runelite-api:${ProjectVersions.openosrsVersion}+")
+//        compileOnly("com.openosrs:runelite-client:${ProjectVersions.openosrsVersion}+")
+//        compileOnly("com.openosrs.rs:runescape-api:${ProjectVersions.openosrsVersion}+")
 
         compileOnly(Libraries.guice)
         compileOnly(Libraries.lombok)

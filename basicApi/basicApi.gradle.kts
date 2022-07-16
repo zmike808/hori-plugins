@@ -37,9 +37,9 @@ dependencies {
 
     compileOnly("net.unethicalite:runelite-api:${ProjectVersions.unethicaliteVersion}+")
     compileOnly("net.unethicalite:runelite-client:${ProjectVersions.unethicaliteVersion}+")
-    compileOnly("com.openosrs:runelite-api:${ProjectVersions.openosrsVersion}+")
-    compileOnly("com.openosrs:runelite-client:${ProjectVersions.openosrsVersion}+")
-    compileOnly(group = "com.openosrs.externals", name = "iutils", version = "7.0.1");
+//    compileOnly("com.openosrs:runelite-api:${ProjectVersions.openosrsVersion}+")
+//    compileOnly("com.openosrs:runelite-client:${ProjectVersions.openosrsVersion}+")
+    compileOnly(group = "com.openosrs.externals", name = "iutils", version = "8.0.0");
 
     compileOnly(Libraries.guice)
     compileOnly(Libraries.lombok)

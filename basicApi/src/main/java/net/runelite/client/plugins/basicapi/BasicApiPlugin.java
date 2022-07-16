@@ -94,12 +94,12 @@ public class BasicApiPlugin extends Plugin {
 		objects.add(wallObjectSpawned.getWallObject());
 	}
 
-	@Subscribe
-	public void onWallObjectChanged(WallObjectChanged wallObjectChanged)
-	{
-		objects.remove(wallObjectChanged.getPrevious());
-		objects.add(wallObjectChanged.getWallObject());
-	}
+//	@Subscribe
+//	public void onWallObjectChanged(WallObjectChanged wallObjectChanged)
+//	{
+//		objects.remove(wallObjectChanged.getPrevious());
+//		objects.add(wallObjectChanged.getWallObject());
+//	}
 
 	@Subscribe
 	public void onWallObjectDespawned(WallObjectDespawned wallObjectDespawned)
@@ -112,13 +112,13 @@ public class BasicApiPlugin extends Plugin {
 	{
 		objects.add(gameObjectSpawned.getGameObject());
 	}
-
-	@Subscribe
-	public void onGameObjectChanged(GameObjectChanged gameObjectChanged)
-	{
-		objects.remove(gameObjectChanged.getPrevious());
-		objects.add(gameObjectChanged.getGameObject());
-	}
+// was removed from uneth-lite api because it apperently is not actually used?
+//	@Subscribe
+//	public void onGameObjectChanged(GameObjectChanged gameObjectChanged)
+//	{
+//		objects.remove(gameObjectChanged.getPrevious());
+//		objects.add(gameObjectChanged.getGameObject());
+//	}
 
 	@Subscribe
 	public void onGameObjectDespawned(GameObjectDespawned gameObjectDespawned)
@@ -131,13 +131,13 @@ public class BasicApiPlugin extends Plugin {
 	{
 		objects.add(decorativeObjectSpawned.getDecorativeObject());
 	}
-
-	@Subscribe
-	public void onDecorativeObjectChanged(DecorativeObjectChanged decorativeObjectChanged)
-	{
-		objects.remove(decorativeObjectChanged.getPrevious());
-		objects.add(decorativeObjectChanged.getDecorativeObject());
-	}
+// was removed from unethicalite api with commit e7774350426917d840e3b842c0050ab053ae7682
+//	@Subscribe
+//	public void onDecorativeObjectChanged(DecorativeObjectChanged decorativeObjectChanged)
+//	{
+//		objects.remove(decorativeObjectChanged.getPrevious());
+//		objects.add(decorativeObjectChanged.getDecorativeObject());
+//	}
 
 	@Subscribe
 	public void onDecorativeObjectDespawned(DecorativeObjectDespawned decorativeObjectDespawned)
@@ -150,13 +150,13 @@ public class BasicApiPlugin extends Plugin {
 	{
 		objects.add(groundObjectSpawned.getGroundObject());
 	}
-
-	@Subscribe
-	public void onGroundObjectChanged(GroundObjectChanged groundObjectChanged)
-	{
-		objects.remove(groundObjectChanged.getPrevious());
-		objects.add(groundObjectChanged.getGroundObject());
-	}
+// removed from uneth-api on commit 761705e1a95cd9deed2489d2afb6ff87b0b9aa07
+//	@Subscribe
+//	public void onGroundObjectChanged(GroundObjectChanged groundObjectChanged)
+//	{
+//		objects.remove(groundObjectChanged.getPrevious());
+//		objects.add(groundObjectChanged.getGroundObject());
+//	}
 
 	@Subscribe
 	public void onGroundObjectDespawned(GroundObjectDespawned groundObjectDespawned)
