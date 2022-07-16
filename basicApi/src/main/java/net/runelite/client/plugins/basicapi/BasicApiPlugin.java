@@ -19,6 +19,8 @@ import net.runelite.client.plugins.basicapi.utils.BankingUtilsTest;
 import net.runelite.client.plugins.iutils.game.Game;
 import net.runelite.client.plugins.iutils.iUtils;
 import org.pf4j.Extension;
+import net.runelite.api.*;
+import net.runelite.api.events.*;
 
 import javax.inject.Inject;
 import java.util.HashSet;
@@ -94,12 +96,12 @@ public class BasicApiPlugin extends Plugin {
 		objects.add(wallObjectSpawned.getWallObject());
 	}
 
-	@Subscribe
-	public void onWallObjectChanged(WallObjectChanged wallObjectChanged)
-	{
-		objects.remove(wallObjectChanged.getPrevious());
-		objects.add(wallObjectChanged.getWallObject());
-	}
+//	@Subscribe
+//	public void onWallObjectChanged(WallObjectChanged wallObjectChanged)
+//	{
+//		objects.remove(wallObjectChanged.getPrevious());
+//		objects.add(wallObjectChanged.getWallObject());
+//	}
 
 	@Subscribe
 	public void onWallObjectDespawned(WallObjectDespawned wallObjectDespawned)
@@ -113,12 +115,12 @@ public class BasicApiPlugin extends Plugin {
 		objects.add(gameObjectSpawned.getGameObject());
 	}
 
-	@Subscribe
-	public void onGameObjectChanged(GameObjectChanged gameObjectChanged)
-	{
-		objects.remove(gameObjectChanged.getPrevious());
-		objects.add(gameObjectChanged.getGameObject());
-	}
+//	@Subscribe
+//	public void onGameObjectChanged(GameObjectChanged gameObjectChanged)
+//	{
+//		objects.remove(gameObjectChanged.getPrevious());
+//		objects.add(gameObjectChanged.getGameObject());
+//	}
 
 	@Subscribe
 	public void onGameObjectDespawned(GameObjectDespawned gameObjectDespawned)
@@ -132,12 +134,12 @@ public class BasicApiPlugin extends Plugin {
 		objects.add(decorativeObjectSpawned.getDecorativeObject());
 	}
 
-	@Subscribe
-	public void onDecorativeObjectChanged(DecorativeObjectChanged decorativeObjectChanged)
-	{
-		objects.remove(decorativeObjectChanged.getPrevious());
-		objects.add(decorativeObjectChanged.getDecorativeObject());
-	}
+//	@Subscribe
+//	public void onDecorativeObjectChanged(DecorativeObjectChanged decorativeObjectChanged)
+//	{
+//		objects.remove(decorativeObjectChanged.getPrevious());
+//		objects.add(decorativeObjectChanged.getDecorativeObject());
+//	}
 
 	@Subscribe
 	public void onDecorativeObjectDespawned(DecorativeObjectDespawned decorativeObjectDespawned)

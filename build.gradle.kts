@@ -1,4 +1,5 @@
 import ProjectVersions.openosrsVersion
+val unethicaliteVersion = "1.0.2"
 
 buildscript {
     repositories {
@@ -40,7 +41,7 @@ subprojects {
     repositories {
         jcenter {
             content {
-                excludeGroupByRegex("com\\.openosrs.*")
+                excludeGroupByRegex("net\\.unethicalite.*")
             }
         }
 
@@ -49,7 +50,7 @@ subprojects {
                 mavenLocal()
             }
             filter {
-                includeGroupByRegex("com\\.openosrs.*")
+                includeGroupByRegex("net\\.unethicalite.*")
             }
         }
     }
@@ -60,10 +61,10 @@ subprojects {
         annotationProcessor(Libraries.lombok)
         annotationProcessor(Libraries.pf4j)
 
-        compileOnly("com.openosrs:http-api:$openosrsVersion+")
-        compileOnly("com.openosrs:runelite-api:$openosrsVersion+")
-        compileOnly("com.openosrs:runelite-client:$openosrsVersion+")
-        compileOnly("com.openosrs.rs:runescape-api:$openosrsVersion+")
+        compileOnly("net.unethicalite:http-api:$unethicaliteVersion+")
+        compileOnly("net.unethicalite:runelite-api:$unethicaliteVersion+")
+        compileOnly("net.unethicalite:runelite-client:$unethicaliteVersion+")
+        compileOnly("net.unethicalite.rs:runescape-api:$unethicaliteVersion+")
 
         compileOnly(Libraries.guice)
         compileOnly(Libraries.lombok)

@@ -1,4 +1,6 @@
 import ProjectVersions.openosrsVersion
+//import ProjectVersions.unethicaliteVersion
+val unethicaliteVersion = "1.0.2"
 
 /*
  * Copyright (c) 2019 Owain van Brakel <https://github.com/Owain94>
@@ -34,9 +36,9 @@ dependencies {
     annotationProcessor(Libraries.lombok)
     annotationProcessor(Libraries.pf4j)
 
-    compileOnly("com.openosrs:runelite-api:$openosrsVersion+")
-    compileOnly("com.openosrs:runelite-client:$openosrsVersion+")
-    compileOnly(group = "com.openosrs.externals", name = "iutils", version = "5.0.3");
+    compileOnly("net.unethicalite:runelite-api:$unethicaliteVersion+")
+    compileOnly("net.unethicalite:runelite-client:$unethicaliteVersion+")
+    compileOnly(group = "com.openosrs.externals", name = "iutils", version = "7.0.0");
 
     compileOnly(Libraries.guice)
     compileOnly(Libraries.lombok)
