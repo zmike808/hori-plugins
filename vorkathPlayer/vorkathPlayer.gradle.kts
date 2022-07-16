@@ -1,6 +1,5 @@
 import ProjectVersions.openosrsVersion
-val unethicaliteVersion = "1.0.2"
-
+import ProjectVersions.unethicaliteVersion
 /*
  * Copyright (c) 2019 Owain van Brakel <https://github.com/Owain94>
  * All rights reserved.
@@ -26,7 +25,7 @@ val unethicaliteVersion = "1.0.2"
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-version = "2.0.0"
+version = "3.0.0"
 
 project.extra["PluginName"] = "Vorkath Player" // This is the name that is used in the external plugin manager panel
 project.extra["PluginDescription"] = "Plays vorkath" // This is the description that is used in the external plugin manager panel
@@ -37,8 +36,10 @@ dependencies {
 
     compileOnly("net.unethicalite:runelite-api:$unethicaliteVersion+")
     compileOnly("net.unethicalite:runelite-client:$unethicaliteVersion+")
-    compileOnly(group = "com.openosrs.externals", name = "basicApi", version = "1.1.5");
-    compileOnly(group = "com.openosrs.externals", name = "iutils", version = "7.0.0");
+    compileOnly("com.openosrs:runelite-api:${ProjectVersions.openosrsVersion}+")
+    compileOnly("com.openosrs:runelite-client:${ProjectVersions.openosrsVersion}+")
+    compileOnly(group = "com.openosrs.externals", name = "basicApi", version = "2.0.0");
+    compileOnly(group = "com.openosrs.externals", name = "iutils", version = "7.0.1");
 
 
     compileOnly(Libraries.guice)
