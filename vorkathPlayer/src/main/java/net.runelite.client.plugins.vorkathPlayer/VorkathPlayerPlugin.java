@@ -349,10 +349,24 @@ public class VorkathPlayerPlugin extends iScript {
 				case PRAYER_ON:
 					if(!prayerUtils.isQuickPrayerActive() && prayerUtils.getRemainingPoints() > 0)
 						prayerUtils.toggleQuickPrayer(true, sleepDelay());
+					if(isSpecActive()) {
+						// toggle on piety for the spec attack
+						if(prayerUtils.getRemainingPoints() > 0) {
+							prayerUtils.togglePrayer(true, Prayer.PIETY, sleepDelay());
+						}
+					}
 					break;
 				case PRAYER_OFF:
 					if(prayerUtils.isQuickPrayerActive())
 						prayerUtils.toggleQuickPrayer(false, sleepDelay());
+					if(isAcid && prayerUtils.getRemainingPoints() > 0) {
+						if(config.useRange()) {
+							prayerUtils.togglePrayer(true, Prayer.RIGOUR, sleepDelay());
+						}
+						else {
+							prayerUtils.togglePrayer(true, Prayer.PIETY, sleepDelay());
+						}
+					}
 
 					break;
 				case EQUIP_MH:
@@ -545,6 +559,10 @@ public class VorkathPlayerPlugin extends iScript {
 					break;
 				case RETALIATE:
 					if(vorkathAlive != null){
+						if(isSpecActive() && prayerUtils.getRemainingPoints() > 0) {
+							// toggle on piety for the spec attack
+							prayerUtils.togglePrayer(true, Prayer.PIETY, sleepDelay());
+						}
 						actionNPC(vorkathAlive.id(), MenuAction.NPC_SECOND_OPTION, sleepDelay());
 					}
 					break;

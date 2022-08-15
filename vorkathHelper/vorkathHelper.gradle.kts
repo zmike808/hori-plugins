@@ -36,8 +36,8 @@ dependencies {
 
     compileOnly("com.openosrs:runelite-api:$openosrsVersion+")
     compileOnly("com.openosrs:runelite-client:$openosrsVersion+")
-    compileOnly(group = "com.openosrs.externals", name = "basicApi", version = "1.1.0+");
-    compileOnly(group = "com.openosrs.externals", name = "iutils", version = "4.9.4+");
+    compileOnly(group = "com.openosrs.externals", name = "basicApi", version = "1.1.5");
+    compileOnly(group = "com.openosrs.externals", name = "iutils", version = "5.0.3");
 
     compileOnly(Libraries.guice)
     compileOnly(Libraries.lombok)
