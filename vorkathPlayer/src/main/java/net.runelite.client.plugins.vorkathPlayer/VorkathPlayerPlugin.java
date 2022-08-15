@@ -295,6 +295,12 @@ public class VorkathPlayerPlugin extends iScript {
 
 				if(prayerUtils.isQuickPrayerActive()){
 					prayerUtils.toggleQuickPrayer(false, calc.getRandomIntBetweenRange(100,150));
+					if(config.useRange()) {
+						prayerUtils.togglePrayer(true, Prayer.RIGOUR, calc.getRandomIntBetweenRange(100,150));
+					}
+					else {
+						prayerUtils.togglePrayer(true, Prayer.PIETY, calc.getRandomIntBetweenRange(100,150));
+					}
 				}
 			}
 			--timeout;
@@ -359,24 +365,23 @@ public class VorkathPlayerPlugin extends iScript {
 				case PRAYER_OFF:
 					if(prayerUtils.isQuickPrayerActive())
 						prayerUtils.toggleQuickPrayer(false, sleepDelay());
-					if(isAcid() && prayerUtils.getRemainingPoints() > 0) {
-						if(config.useRange()) {
-							prayerUtils.togglePrayer(true, Prayer.RIGOUR, sleepDelay());
-						}
-						else {
-							prayerUtils.togglePrayer(true, Prayer.PIETY, sleepDelay());
-						}
-					}
-
+//					if(isAcid() && prayerUtils.getRemainingPoints() > 0) {
+//						if(config.useRange()) {
+//							prayerUtils.togglePrayer(true, Prayer.RIGOUR, sleepDelay());
+//						}
+//						else {
+//							prayerUtils.togglePrayer(true, Prayer.PIETY, sleepDelay());
+//						}
+//					}
 					break;
 				case EQUIP_MH:
 					inventory.interactWithItem(getMainhandId(), sleepDelay(), "Wield");
-					if(config.useRange()) {
-						prayerUtils.togglePrayer(true, Prayer.RIGOUR, sleepDelay());
-					}
-					else {
-						prayerUtils.togglePrayer(true, Prayer.PIETY, sleepDelay());
-					}
+//					if(config.useRange()) {
+//						prayerUtils.togglePrayer(true, Prayer.RIGOUR, sleepDelay());
+//					}
+//					else {
+//						prayerUtils.togglePrayer(true, Prayer.PIETY, sleepDelay());
+//					}
 					break;
 				case EQUIP_OH:
 					inventory.interactWithItem(getOffhandId(), sleepDelay(), "Wield", "Equip", "Wear");
@@ -391,7 +396,7 @@ public class VorkathPlayerPlugin extends iScript {
 							return;
 						}
 					}
-					prayerUtils.togglePrayer(true, Prayer.PIETY, sleepDelay());
+
 					inventory.interactWithItem(getSpecId(), sleepDelay(), "Wield");
 					break;
 				case EQUIP_STAFF:
@@ -1143,6 +1148,7 @@ public class VorkathPlayerPlugin extends iScript {
 			if(canSpec() && (isWakingUp() || (vorkathAlive != null && !vorkathAlive.isDead() && (calculateHealth(vorkathAlive) == -1 || calculateHealth(vorkathAlive) >= 750)))){
 				if(isItemEquipped(getSpecId())){
 					//if(isSpecActive() && (player.getInteracting() == null || !player.getInteracting().getName().equalsIgnoreCase("Vorkath"))){
+					prayerUtils.togglePrayer(true, Prayer.PIETY, calc.getRandomIntBetweenRange(100,150));
 					if(isSpecActive()){
 						return RETALIATE;
 					}else{
@@ -1166,6 +1172,9 @@ public class VorkathPlayerPlugin extends iScript {
 
 			if(!config.useStaff() || (config.useStaff() && !isMinion)){
 				if(vorkathAlive != null && !isItemEquipped(getMainhandId()) && inventory.contains(getMainhandId()))
+					if(config.useRange()) {
+						prayerUtils.togglePrayer(true, Prayer.RIGOUR, calc.getRandomIntBetweenRange(100,150));
+					}
 					return EQUIP_MH;
 				if(vorkathAlive != null && getOffhandId() != 0 && !isItemEquipped(getOffhandId()) && inventory.contains(getOffhandId()))
 					return EQUIP_OH;
@@ -1539,6 +1548,7 @@ public class VorkathPlayerPlugin extends iScript {
 				utils.doInvokeMsTime(targetMenu, sleepDelay());
 			else
 				utils.doActionMsTime(targetMenu, widget.getBounds(), sleepDelay());
+//			prayerUtils.togglePrayer(true, Prayer.PIETY, sleepDelay());
 		}
 		return;
 	}
