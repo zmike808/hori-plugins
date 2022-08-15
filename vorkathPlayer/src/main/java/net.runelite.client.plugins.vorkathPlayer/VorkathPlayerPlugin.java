@@ -289,6 +289,7 @@ public class VorkathPlayerPlugin extends iScript {
 
 		if(timeout > 0){
 			if(isAcid()){
+				game.sendGameMessage("Acid Phase: Turning off prayer + run & turning on offensive prayer");
 				if (playerUtils.isRunEnabled()) {
 					toggleRun(false, calc.getRandomIntBetweenRange(0, 30));
 				}
@@ -296,6 +297,18 @@ public class VorkathPlayerPlugin extends iScript {
 				if(prayerUtils.isQuickPrayerActive()){
 					prayerUtils.toggleQuickPrayer(false, calc.getRandomIntBetweenRange(100,150));
 				}
+				if(config.useRange()) {
+					if (!prayerUtils.isActive(Prayer.RIGOUR)) {
+						game.sendGameMessage("Toggling on Rigour for acid phase");
+						prayerUtils.togglePrayer(true, Prayer.RIGOUR, sleepDelay());
+					}
+				} else {
+					if (!prayerUtils.isActive(Prayer.PIETY)) {
+						game.sendGameMessage("Toggling on Piety for acid phase");
+						prayerUtils.togglePrayer(true, Prayer.PIETY, sleepDelay());
+					}
+				}
+
 			}
 			--timeout;
 			return;
@@ -356,6 +369,13 @@ public class VorkathPlayerPlugin extends iScript {
 
 					break;
 				case EQUIP_MH:
+					if(config.useRange()) {
+						if (!prayerUtils.isActive(Prayer.RIGOUR)) {
+							game.sendGameMessage("Toggling on Rigour before equipping mainhand");
+							prayerUtils.togglePrayer(true, Prayer.RIGOUR, sleepDelay());
+							return;
+						}
+					}
 					inventory.interactWithItem(getMainhandId(), sleepDelay(), "Wield");
 					break;
 				case EQUIP_OH:
@@ -1117,6 +1137,9 @@ public class VorkathPlayerPlugin extends iScript {
 
 			if(canSpec() && (isWakingUp() || (vorkathAlive != null && !vorkathAlive.isDead() && (calculateHealth(vorkathAlive) == -1 || calculateHealth(vorkathAlive) >= 750)))){
 				if(isItemEquipped(getSpecId())){
+					if (!prayerUtils.isActive(Prayer.PIETY)){
+						prayerUtils.togglePrayer(true, Prayer.PIETY, calc.getRandomIntBetweenRange(0, 30));
+					}
 					//if(isSpecActive() && (player.getInteracting() == null || !player.getInteracting().getName().equalsIgnoreCase("Vorkath"))){
 					if(isSpecActive()){
 						return RETALIATE;
@@ -1514,6 +1537,10 @@ public class VorkathPlayerPlugin extends iScript {
 				utils.doInvokeMsTime(targetMenu, sleepDelay());
 			else
 				utils.doActionMsTime(targetMenu, widget.getBounds(), sleepDelay());
+		}
+		if(isSpecActive() && !prayerUtils.isActive(Prayer.PIETY)) {
+			game.sendGameMessage("spec is on, now activating piety");
+			prayerUtils.togglePrayer(true, Prayer.PIETY, sleepDelay());
 		}
 		return;
 	}
