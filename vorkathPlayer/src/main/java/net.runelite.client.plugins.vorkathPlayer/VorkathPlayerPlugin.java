@@ -1170,12 +1170,13 @@ public class VorkathPlayerPlugin extends iScript {
 					&& vorkathAlive.animation() != 7957)
 				return SWITCH_DIAMOND;
 
-			if(!config.useStaff() || (config.useStaff() && !isMinion)){
-				if(vorkathAlive != null && !isItemEquipped(getMainhandId()) && inventory.contains(getMainhandId()))
-					if(config.useRange()) {
-						prayerUtils.togglePrayer(true, Prayer.RIGOUR, calc.getRandomIntBetweenRange(100,150));
+			if(!config.useStaff() || (config.useStaff() && !isMinion)) {
+				if (vorkathAlive != null && !isItemEquipped(getMainhandId()) && inventory.contains(getMainhandId())) {
+					if (config.useRange()) {
+						prayerUtils.togglePrayer(true, Prayer.RIGOUR, calc.getRandomIntBetweenRange(100, 150));
 					}
-					return EQUIP_MH;
+				return EQUIP_MH;
+			}
 				if(vorkathAlive != null && getOffhandId() != 0 && !isItemEquipped(getOffhandId()) && inventory.contains(getOffhandId()))
 					return EQUIP_OH;
 			}
